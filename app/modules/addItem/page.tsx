@@ -46,7 +46,7 @@ const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
 				<Plus size={20} />
 				<span>Create a task</span>
 			</PopoverTrigger>
-			<PopoverContent>
+			<PopoverContent className="w-100 bg-white p-4 rounded-lg shadow-lg">
 				<PopoverHeader>
 					<PopoverDescription>
 						Create a new item for your tracker.
