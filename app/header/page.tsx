@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 const NavHeader = ({ className }: { className: string }) => {
 	const [isOpen, setIsOpen] = useState(false);
@@ -61,7 +61,7 @@ const NavHeader = ({ className }: { className: string }) => {
 							onClick={() => setIsOpen((prev) => !prev)}
 							className="text-white focus:outline-none"
 						>
-							<Menu size={24} />
+							{isOpen ? <X size={24} /> : <Menu size={24} />}
 						</button>
 					</div>
 
