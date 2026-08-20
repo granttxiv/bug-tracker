@@ -59,7 +59,7 @@ const NavHeader = ({ className }: { className: string }) => {
 					<div className="sm:hidden">
 						<button
 							onClick={() => setIsOpen((prev) => !prev)}
-							className="text-white focus:outline-none"
+							className="text-white focus:outline-none cursor-pointer"
 						>
 							{isOpen ? <X size={24} /> : <Menu size={24} />}
 						</button>
