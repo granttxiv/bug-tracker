@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { Menu } from "lucide-react";
 
 const NavHeader = ({ className }: { className: string }) => {
 	const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +13,7 @@ const NavHeader = ({ className }: { className: string }) => {
 					<Link href="/" className="text-white font-bold text-lg">
 						Bug Tracker
 					</Link>
-					<nav className="flex space-x-4">
+					<nav className="flex-nowrap items-center space-x-4 whitespace-nowrap hidden sm:flex">
 						<Link href="/backlog" className="text-white hover:text-gray-300">
 							Backlog
 						</Link>
@@ -38,7 +39,7 @@ const NavHeader = ({ className }: { className: string }) => {
 								onClick={() => setIsOpen((prev) => !prev)}
 							/>
 						</div>
-						{isOpen && (
+						{/* {isOpen && (
 							<div className="absolute right-4 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
 								<Link
 									href="/profile"
@@ -53,8 +54,17 @@ const NavHeader = ({ className }: { className: string }) => {
 									Logout
 								</Link>
 							</div>
-						)}
+						)} */}
 					</nav>
+					<div className="sm:hidden">
+						<button
+							onClick={() => setIsOpen((prev) => !prev)}
+							className="text-white focus:outline-none"
+						>
+							<Menu size={24} />
+						</button>
+					</div>
+
 				</div>
 			</nav>
 		</>
