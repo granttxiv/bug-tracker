@@ -3,16 +3,20 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, ArrowLeft, ArrowRight } from "lucide-react";
 
+type LoginFormValues = {
+	email: string;
+	password: string;
+};
+
 const Login = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm();
+	} = useForm<LoginFormValues>();
 
-	const onSubmit = (data: { email: string; password: string }) =>
-		console.log(data);
+	const onSubmit = (data: LoginFormValues) => console.log(data);
 
 	return (
 		<div className="min-h-screen w-full flex items-center justify-center bg-[#EFE8E2] p-6">
@@ -32,7 +36,7 @@ const Login = () => {
 							<input
 								type="email"
 								placeholder="Email"
-								className="w-full h-12 px-4 rounded-lg bg-white border border-[#E3DED6] text-sm text-[#221D1E] placeholder:text-[#9C9791] outline-none focus:ring-2 focus:ring-[#9C6577] transition"
+								className="w-full h-12 px-4 rounded-lg bg-white border border-[#E3DED6] text-sm text-[#221D1E] placeholder:text-[#9C9791] outline-none focus:ring-2 focus:ring-blue-800 transition"
 								{...register("email", { required: "Email is required" })}
 							/>
 							{errors.email && (
@@ -47,7 +51,7 @@ const Login = () => {
 								<input
 									type={showPassword ? "text" : "password"}
 									placeholder="Password"
-									className="w-full h-12 px-4 pr-11 rounded-lg bg-white border border-[#E3DED6] text-sm text-[#221D1E] placeholder:text-[#9C9791] outline-none focus:ring-2 focus:ring-[#9C6577] transition"
+									className="w-full h-12 px-4 pr-11 rounded-lg bg-white border border-[#E3DED6] text-sm text-[#221D1E] placeholder:text-[#9C9791] outline-none focus:ring-2 focus:ring-blue-800 transition"
 									{...register("password", {
 										required: "Password is required",
 									})}
@@ -79,7 +83,7 @@ const Login = () => {
 
 						<button
 							type="submit"
-							className="mt-2 h-12 rounded-lg bg-[#9C6577] text-white text-sm font-semibold hover:bg-[#8A5769] active:scale-[0.99] transition"
+							className="mt-2 h-12 rounded-lg bg-blue-800 text-white text-sm font-semibold hover:bg-blue-900 active:scale-[0.99] transition"
 						>
 							Sign In
 						</button>
