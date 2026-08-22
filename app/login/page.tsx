@@ -11,7 +11,8 @@ const Login = () => {
 		formState: { errors },
 	} = useForm();
 
-	const onSubmit = (data) => console.log(data);
+	const onSubmit = (data: { email: string; password: string }) =>
+		console.log(data);
 
 	return (
 		<div className="min-h-screen w-full flex items-center justify-center bg-[#EFE8E2] p-6">
@@ -82,24 +83,6 @@ const Login = () => {
 						>
 							Sign In
 						</button>
-
-						<div className="flex items-center gap-3 mt-4">
-							<div className="h-px flex-1 bg-[#E3DED6]" />
-							<span className="text-xs text-[#9C9791]">Or continue with</span>
-							<div className="h-px flex-1 bg-[#E3DED6]" />
-						</div>
-
-						<div className="flex items-center justify-center gap-3 mt-2">
-							<SocialButton label="Continue with Google" dark={undefined}>
-								<GoogleIcon />
-							</SocialButton>
-							<SocialButton label="Continue with Apple" dark>
-								<AppleIcon />
-							</SocialButton>
-							<SocialButton label="Continue with Facebook" dark={undefined}>
-								<FacebookIcon />
-							</SocialButton>
-						</div>
 					</form>
 				</div>
 
@@ -111,7 +94,7 @@ const Login = () => {
 						Finally, all your work in one place.
 					</p>
 
-					<div className="absolute left-8 bottom-8 flex gap-2">
+					<div className="absolute left-8 bottom-8 flex gap-2 justify-center items-center">
 						<NavCircle>
 							<ArrowLeft size={16} />
 						</NavCircle>
@@ -125,63 +108,13 @@ const Login = () => {
 	);
 };
 
-const SocialButton = ({ children, label, dark }) => (
-	<button
-		type="button"
-		aria-label={label}
-		className={`w-12 h-12 rounded-xl border flex items-center justify-center transition ${
-			dark
-				? "bg-[#221D1E] border-[#221D1E] hover:opacity-90"
-				: "bg-white border-[#E3DED6] hover:border-[#9C9791]"
-		}`}
-	>
-		{children}
-	</button>
-);
-
-const NavCircle = ({ children }) => (
+const NavCircle = ({ children }: { children: React.ReactNode }) => (
 	<button
 		type="button"
 		className="w-9 h-9 rounded-full border border-white/70 text-white flex items-center justify-center hover:bg-white/10 transition"
 	>
 		{children}
 	</button>
-);
-
-const GoogleIcon = () => (
-	<svg width="20" height="20" viewBox="0 0 20 20">
-		<path
-			fill="#4285F4"
-			d="M19.6 10.2c0-.7-.06-1.36-.17-2H10v3.79h5.38c-.23 1.24-.94 2.3-2 3v2.48h3.23c1.9-1.75 2.99-4.32 2.99-7.27z"
-		/>
-		<path
-			fill="#34A853"
-			d="M10 20c2.7 0 4.96-.9 6.61-2.43l-3.23-2.48c-.9.6-2.04.96-3.38.96-2.6 0-4.8-1.75-5.59-4.11H1.06v2.56A9.998 9.998 0 0 0 10 20z"
-		/>
-		<path
-			fill="#FBBC05"
-			d="M4.41 11.94A5.99 5.99 0 0 1 4.09 10c0-.67.12-1.32.32-1.94V5.5H1.06A9.998 9.998 0 0 0 0 10c0 1.61.39 3.14 1.06 4.5l3.35-2.56z"
-		/>
-		<path
-			fill="#EA4335"
-			d="M10 3.96c1.47 0 2.79.5 3.82 1.49l2.87-2.87C14.95.9 12.7 0 10 0 6.09 0 2.71 2.24 1.06 5.5l3.35 2.56C5.2 5.71 7.4 3.96 10 3.96z"
-		/>
-	</svg>
-);
-
-const AppleIcon = () => (
-	<svg width="18" height="18" viewBox="0 0 20 20" fill="white">
-		<path d="M14.94 5.19c-.83.98-2.16 1.75-3.49 1.64-.17-1.33.47-2.72 1.24-3.58C13.52 2.25 14.94 1.6 16.1 1.5c.14 1.4-.4 2.77-1.16 3.69zM16.08 6.9c-1.93-.11-3.57 1.1-4.5 1.1-.94 0-2.35-1.04-3.88-1.02-2 .03-3.84 1.16-4.86 2.95-2.08 3.6-.54 8.93 1.49 11.85.99 1.44 2.17 3.05 3.73 2.99 1.49-.06 2.06-.96 3.86-.96 1.8 0 2.31.96 3.88.93 1.6-.03 2.62-1.46 3.6-2.9 1.13-1.66 1.6-3.28 1.62-3.36-.04-.02-3.12-1.2-3.15-4.76-.03-2.98 2.44-4.41 2.55-4.48-1.4-2.06-3.57-2.29-4.34-2.34z" />
-	</svg>
-);
-
-const FacebookIcon = () => (
-	<svg width="20" height="20" viewBox="0 0 20 20">
-		<path
-			fill="#1877F2"
-			d="M20 10a10 10 0 1 0-11.56 9.88v-6.99H5.9V10h2.54V7.8c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V10h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 20 10z"
-		/>
-	</svg>
 );
 
 const SunsetIllustration = () => (
