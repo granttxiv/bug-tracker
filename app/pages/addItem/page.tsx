@@ -40,7 +40,7 @@ const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger
 				render={
-					<button className="flex w-45 items-center space-x-2 rounded-2xl bg-blue-500 px-5 py-3.5 font-semibold text-white hover:bg-blue-600 mt-3.5" />
+					<button className="flex w-45 items-center space-x-2 rounded-2xl bg-blue-800 px-5 py-3.5 font-semibold text-white hover:bg-blue-700 mt-3.5" />
 				}
 			>
 				<Plus size={20} />
@@ -58,6 +58,7 @@ const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
 						className="rounded border border-gray-300 px-2 py-1.5 outline-none focus:border-blue-500"
 						placeholder="Enter a title"
 						type="text"
+						required
 						value={title}
 						onChange={(e) => setTitle(e.target.value)}
 					/>
@@ -91,6 +92,7 @@ const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
 							type="radio"
 							name="status"
 							value="pending"
+							required
 							checked={status === "pending"}
 							onChange={(e) => setStatus(e.target.value)}
 							className="mr-2 accent-blue-700"
@@ -103,6 +105,7 @@ const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
 							type="radio"
 							name="status"
                 value="in-progress"
+								required
                 checked={status === "in-progress"}
                 onChange={(e) => setStatus(e.target.value)}
                 className="mr-2 accent-yellow-500"
