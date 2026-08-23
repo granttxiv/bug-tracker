@@ -303,21 +303,21 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 #### 2.1 Database Schema Expansion
 
-- [ ] Create `tickets` table
-- [ ] Create `ticket_comments` table
-- [ ] Create `ticket_activities` table
-- [ ] Create `ticket_attachments` table (metadata only, files in S3)
-- [ ] Add indices on common queries (client_id, status, created_at)
+- [x] Create `tickets` table
+- [x] Create `ticket_comments` table
+- [x] Create `ticket_activities` table
+- [x] Create `ticket_attachments` table (metadata only, files in S3)
+- [x] Add indices on common queries (client_id, status, created_at)
 
 #### 2.2 Ticket API (Client View)
 
-- [ ] `GET /api/tickets` – List user's tickets (pagination, filters by status)
-- [ ] `POST /api/tickets` – Create ticket
+- [x] `GET /api/tickets` – List user's tickets (pagination, filters by status)
+- [x] `POST /api/tickets` – Create ticket
   - Validate fields: title, description, type, priority, version, environment
   - Auto-set status = "new"
   - Log in `ticket_activities`
-- [ ] `GET /api/tickets/:id` – Get ticket + comments + attachments
-- [ ] `PATCH /api/tickets/:id` – Update (client can only change: description, steps_to_reproduce)
+- [x] `GET /api/tickets/:id` – Get ticket + comments + attachments
+- [x] `PATCH /api/tickets/:id` – Update (client can only change: description, steps_to_reproduce)
 - [ ] `POST /api/tickets/:id/comments` – Add public reply
 
 #### 2.3 Attachments (S3 Integration)
