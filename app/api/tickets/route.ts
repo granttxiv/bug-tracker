@@ -3,6 +3,7 @@ import { withAuth, AuthenticatedRequest } from "@/lib/auth/middleware";
 import { CreateTicketSchema, ListTicketsSchema } from "@/lib/types/ticket";
 import { createTicket, listClientTickets, logActivity } from "@/lib/db/tickets";
 import { evaluateAutomationRules, applySLAPolicy } from "@/lib/services/automationEngine";
+import { searchArticles } from "@/lib/db/kb";
 
 export const POST = withAuth(async (req: AuthenticatedRequest) => {
   try {
@@ -58,7 +59,10 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
     // Apply SLA policy (Phase 3)
     await applySLAPolicy(ticket);
 
-    return NextResponse.json(ticket, { status: 201 });
+    // Get KB suggestions (Phase 4)
+    const suggestions = await searchArticles(`${ticket.title} ${ticket.description}`, 3);
+
+    return NextResponse.json({ ...ticket, kbSuggestions: suggestions }, { status: 201 });
   } catch (error) {
     console.error("Error creating ticket:", error);
     return NextResponse.json({ error: "Failed to create ticket" }, { status: 500 });

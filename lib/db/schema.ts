@@ -236,3 +236,29 @@ export type SLAPolicy = typeof slaPolicies.$inferSelect;
 export type NewSLAPolicy = typeof slaPolicies.$inferInsert;
 export type SLABreach = typeof slaBreaches.$inferSelect;
 export type NewSLABreach = typeof slaBreaches.$inferInsert;
+
+// Knowledge Base (Phase 4)
+export const kbArticles = pgTable(
+  "kb_articles",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: varchar("title", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).unique().notNull(),
+    content: text("content").notNull(),
+    category: varchar("category", { length: 100 }),
+    tags: text("tags"),
+    published: boolean("published").notNull().default(false),
+    viewCount: integer("view_count").notNull().default(0),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_kb_published").on(table.published),
+    index("idx_kb_category").on(table.category),
+    index("idx_kb_slug").on(table.slug),
+  ],
+);
+
+export type KBArticle = typeof kbArticles.$inferSelect;
+export type NewKBArticle = typeof kbArticles.$inferInsert;
