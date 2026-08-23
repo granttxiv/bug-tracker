@@ -293,7 +293,7 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 - [x] Manual test auth flow with Postman/curl
 - [x] Verify passwords are hashed
-- [ ] Verify JWT expiration works
+- [x] Verify JWT expiration works
 
 ---
 
