@@ -196,12 +196,46 @@ Quick test:
 curl http://localhost:3000/api/health
 ```
 
-## Next Steps
+## Roadmap (Phases 3-8)
 
-- Phase 2.3: S3 attachments (currently stubbed, MinIO integration pending)
-- Phase 3: Agent dashboard (view all tickets, assign, change status)
-- Phase 4: Automation & SLA
-- ... (see plan.md for full roadmap)
+**Phase 3: Automation & SLA**
+
+- Rules engine (auto-assign, priority changes based on conditions)
+- SLA tracking & breach detection
+- Admin endpoints for rule/policy management
+
+**Phase 4: Knowledge Base**
+
+- Full-text search articles
+- Admin CRUD for articles
+- Optional KB suggestions on ticket creation
+
+**Phase 5: Notifications**
+
+- Email (SendGrid/SES)
+- In-app notifications with user preferences
+- Optional Slack/Teams webhooks
+
+**Phase 6: Reporting**
+
+- Admin dashboards: volume, resolution time, agent performance, SLA
+- Date filters & CSV export
+- Metrics service with Redis caching
+
+**Phase 7: Real-time**
+
+- WebSocket for live updates
+- Event broadcasting with Redis Pub/Sub
+
+**Phase 8: Security & Polish**
+
+- Rate limiting, CORS, secure headers
+- Unit/integration tests
+- Structured logging
+- Structured logging (Winston/Pino)
+- Performance optimization (query logging, Redis caching)
+
+See `plan.md` for full details.
 
 ## Activity Logging
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { withAuth, AuthenticatedRequest } from "@/lib/auth/middleware";
 import { CreateTicketSchema, ListTicketsSchema } from "@/lib/types/ticket";
 import { createTicket, listClientTickets, logActivity } from "@/lib/db/tickets";
+import { evaluateAutomationRules, applySLAPolicy } from "@/lib/services/automationEngine";
 
 export const POST = withAuth(async (req: AuthenticatedRequest) => {
   try {
@@ -50,6 +51,12 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
         priority: ticket.priority,
       },
     });
+
+    // Evaluate automation rules (Phase 3)
+    await evaluateAutomationRules(ticket);
+
+    // Apply SLA policy (Phase 3)
+    await applySLAPolicy(ticket);
 
     return NextResponse.json(ticket, { status: 201 });
   } catch (error) {

@@ -349,56 +349,17 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 - [x] Quick test reference (QUICK_TEST.md)
 - [x] Automated test script (test-phase2.sh)
 
----
-
-### Phase 3: Agent Dashboard & Assignment (Days 13–18)
-
-**Goal**: Agents can view, triage, assign tickets.
-
-#### 3.1 Agent-specific Endpoints
-
-- [ ] `GET /api/agent/dashboard` – Summary stats
-  - Open tickets count
-  - Critical/high priority count
-  - SLA breaches (if implemented)
-  - Assigned to me count
-- [ ] `GET /api/agent/tickets` – Advanced filtering
-  - Filter by: status, priority, type, assigned_to, created_date range
-  - Sort by: priority, created_at, updated_at
-  - Pagination
-- [ ] `PATCH /api/agent/tickets/:id` – Bulk update
-  - status, priority, assigned_to, add internal notes
-- [ ] `POST /api/agent/tickets/:id/comments` – Add internal note (type = internal_note)
-  - Only visible to agents/admins, hidden from client
-
-#### 3.2 Role-based Access Control (RBAC)
-
-- [ ] Middleware: check user role on all endpoints
-  - `/api/tickets/*` → client or agent or admin
-  - `/api/agent/*` → agent or admin only
-  - `/api/admin/*` → admin only
-- [ ] Add role check in request handler: `if (user.role !== 'admin') throw 403`
-
-#### 3.3 Testing
-
-- [ ] Login as agent, verify can see all tickets
-- [ ] Login as client, verify can only see own tickets
-- [ ] Assign ticket to self, verify activity logged
-- [ ] Add internal note, verify hidden from client API
-
----
-
-### Phase 4: Automation & SLA (Days 19–25)
+### Phase 3: Automation & SLA (Days 19–25)
 
 **Goal**: Rule-based ticket handling and SLA tracking.
 
-#### 4.1 Database Schema
+#### 3.1 Database Schema
 
 - [ ] Create `automation_rules` table
 - [ ] Create `sla_policies` table
 - [ ] Create `sla_breaches` table
 
-#### 4.2 Automation Engine
+#### 3.2 Automation Engine
 
 - [ ] Build `services/automationEngine.ts`
   - Load active rules from DB
@@ -409,7 +370,7 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
   - `POST /api/tickets` (on creation)
   - `PATCH /api/agent/tickets/:id` (on update)
 
-#### 4.3 SLA Tracking
+#### 3.3 SLA Tracking
 
 - [ ] On ticket creation: check matching SLA policy, set timers
   - `first_response_due_at` = now + policy.response_time_hours
@@ -419,7 +380,7 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
   - If resolution missed: create breach record, escalate
 - [ ] `GET /api/admin/reports/sla` – SLA compliance stats
 
-#### 4.4 Admin Endpoints (Rule & Policy Management)
+#### 3.4 Admin Endpoints (Rule & Policy Management)
 
 - [ ] `GET /api/admin/automation-rules` – List rules
 - [ ] `POST /api/admin/automation-rules` – Create rule
@@ -427,7 +388,7 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 - [ ] `DELETE /api/admin/automation-rules/:id` – Delete
 - [ ] Same for `sla-policies`
 
-#### 4.5 Testing
+#### 3.5 Testing
 
 - [ ] Create automation rule: if type=bug and priority=critical, assign to senior agent
 - [ ] Create ticket matching rule, verify assigned automatically
@@ -436,15 +397,15 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 ---
 
-### Phase 5: Knowledge Base & Search (Days 26–30)
+### Phase 4: Knowledge Base & Search (Days 26–30)
 
 **Goal**: Self-service content to deflect common tickets.
 
-#### 5.1 Database Schema
+#### 4.1 Database Schema
 
 - [ ] Create `kb_articles` table with full-text index
 
-#### 5.2 Knowledge Base API
+#### 4.2 Knowledge Base API
 
 - [ ] `GET /api/kb/articles` – List published articles (paginated, by category)
 - [ ] `GET /api/kb/articles/search?q=...` – Full-text search
@@ -455,13 +416,13 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 - [ ] `PATCH /api/admin/kb/articles/:id` – Update (admin)
 - [ ] `DELETE /api/admin/kb/articles/:id` – Delete (admin)
 
-#### 5.3 Optional: KB Suggestions
+#### 4.3 Optional: KB Suggestions
 
 - [ ] On `POST /api/tickets`, call KB search with ticket title/description
 - [ ] Return suggested articles in response (help deflect)
 - [ ] Frontend can show "Before creating a ticket, check these articles..."
 
-#### 5.4 Testing
+#### 4.4 Testing
 
 - [ ] Create KB article, publish
 - [ ] Search for it, verify returned
@@ -469,16 +430,16 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 ---
 
-### Phase 6: Notifications & Integrations (Days 31–37)
+### Phase 5: Notifications & Integrations (Days 31–37)
 
 **Goal**: Email, Slack/Teams, in-app notifications.
 
-#### 6.1 Database Schema
+#### 5.1 Database Schema
 
 - [ ] Create `notifications` table
 - [ ] Create `notification_preferences` table
 
-#### 6.2 Email Notifications
+#### 5.2 Email Notifications
 
 - [ ] Add SendGrid or SES SDK
 - [ ] Build `services/emailService.ts`
@@ -489,25 +450,25 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
   - SLA breach: notify agent/manager
 - [ ] Template-based emails (HTML templates in `templates/`)
 
-#### 6.3 In-App Notifications
+#### 5.3 In-App Notifications
 
 - [ ] `POST /api/notifications` – Create notification record
 - [ ] `GET /api/notifications` – List user's notifications
 - [ ] `PATCH /api/notifications/:id` – Mark as read
 
-#### 6.4 Notification Preferences
+#### 5.4 Notification Preferences
 
 - [ ] `GET /api/notifications/preferences` – Get user's preferences
 - [ ] `PATCH /api/notifications/preferences` – User can opt-in/out by channel
 
-#### 6.5 Optional: Slack/Teams Integration
+#### 5.5 Optional: Slack/Teams Integration
 
 - [ ] Register webhook URLs in admin panel
 - [ ] On ticket events, POST to Slack/Teams
   - Format: rich message with ticket summary, CTA
 - [ ] Bidirectional: Slack commands to update tickets (future)
 
-#### 6.6 Testing
+#### 5.6 Testing
 
 - [ ] Create ticket, verify email sent
 - [ ] Assign ticket, verify notification in `/api/notifications`
@@ -515,11 +476,11 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 ---
 
-### Phase 7: Reporting & Analytics (Days 38–42)
+### Phase 6: Reporting & Analytics (Days 38–42)
 
 **Goal**: Admin dashboards with key metrics.
 
-#### 7.1 Admin Reporting Endpoints
+#### 6.1 Admin Reporting Endpoints
 
 - [ ] `GET /api/admin/reports/volume` – Tickets by status, type, date
 - [ ] `GET /api/admin/reports/resolution-time` – Avg/median time to resolve
@@ -527,13 +488,13 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 - [ ] `GET /api/admin/reports/sla-compliance` – SLA breach rates by priority
 - [ ] All reports: support date range filters, export to CSV option
 
-#### 7.2 Metrics Service
+#### 6.2 Metrics Service
 
 - [ ] Build `services/metricsService.ts` with reusable aggregation queries
   - Use PostgreSQL grouping, aggregates
   - Cache results in Redis (1-hour TTL) for heavy queries
 
-#### 7.3 Testing
+#### 6.3 Testing
 
 - [ ] Create 10 tickets, some resolved
 - [ ] Query volume report, verify counts
@@ -541,34 +502,34 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 ---
 
-### Phase 8: WebSocket & Real-time Updates (Days 43–45)
+### Phase 7: WebSocket & Real-time Updates (Days 43–45)
 
 **Goal**: Real-time notifications and live dashboard updates.
 
-#### 8.1 WebSocket Setup
+#### 7.1 WebSocket Setup
 
 - [ ] Use Next.js API routes with WebSocket upgrade (Node.js native or library like `ws`)
 - [ ] `WS /api/ws` – Client connects with JWT
   - Subscribe to: my tickets, assigned tickets, all tickets (admin)
   - Receive events on: ticket_created, status_changed, comment_added, etc.
 
-#### 8.2 Event Broadcasting
+#### 7.2 Event Broadcasting
 
 - [ ] On ticket update, broadcast to all connected clients
 - [ ] Use Redis Pub/Sub to scale across multiple server instances
 
-#### 8.3 Testing
+#### 7.3 Testing
 
 - [ ] Connect WebSocket, create ticket, verify event received in another connection
 - [ ] Disconnect/reconnect, verify no message loss
 
 ---
 
-### Phase 9: Testing, Security, Polish (Days 46–50)
+### Phase 8: Testing, Security, Polish (Days 46–50)
 
 **Goal**: Hardened, tested, production-ready backend.
 
-#### 9.1 Security Audit
+#### 8.1 Security Audit
 
 - [ ] [ ] Rate limiting on auth endpoints (prevent brute force)
 - [ ] [ ] CORS configuration (allow frontend origin only)
@@ -578,7 +539,7 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 - [ ] [ ] CSRF tokens if needed
 - [ ] [ ] Secure headers (Helmet.js)
 
-#### 9.2 Unit & Integration Tests
+#### 8.2 Unit & Integration Tests
 
 - [ ] Create test database (`track_me_test`)
 - [ ] Test auth flows (register, login, token refresh)
@@ -587,7 +548,7 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 - [ ] Test SLA calculations
 - [ ] Use `jest` + `@testing-library`
 
-#### 9.3 Error Handling & Logging
+#### 8.3 Error Handling & Logging
 
 - [ ] Consistent error response format
   - `{ error: string, code: string, statusCode: number }`
@@ -595,14 +556,14 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
   - Log all API requests, database queries (in debug), errors
 - [ ] Error boundaries: catch unhandled exceptions, log, return 500
 
-#### 9.4 Documentation
+#### 8.4 Documentation
 
 - [ ] Update README with setup instructions
 - [ ] Document API endpoints (OpenAPI/Swagger spec, optional)
 - [ ] Document environment variables
 - [ ] Document database schema
 
-#### 9.5 Performance
+#### 8.5 Performance
 
 - [ ] Add database query logging, identify N+1 queries
 - [ ] Optimize slow queries with indices

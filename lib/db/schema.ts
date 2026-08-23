@@ -6,6 +6,7 @@ import {
   pgEnum,
   text,
   integer,
+  boolean,
   jsonb,
   index,
 } from "drizzle-orm/pg-core";
@@ -186,3 +187,52 @@ export type TicketActivityAction =
 
 export type TicketAttachment = typeof ticketAttachments.$inferSelect;
 export type NewTicketAttachment = typeof ticketAttachments.$inferInsert;
+
+// Automation Rules (Phase 3)
+export const automationRules = pgTable("automation_rules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  isActive: boolean("is_active").notNull().default(true),
+  conditions: jsonb("conditions").notNull(), // { type?: string, priority?: string, status?: string }
+  actions: jsonb("actions").notNull(), // { autoAssignTo?: string, priority?: string, status?: string }
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// SLA Policies (Phase 3)
+export const slaPolicies = pgTable("sla_policies", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  firstResponseHours: integer("first_response_hours").notNull(), // Hours to first response
+  resolutionHours: integer("resolution_hours").notNull(), // Hours to resolution
+  conditions: jsonb("conditions").notNull(), // { type?: string, priority?: string }
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// SLA Breaches (Phase 3)
+export const slaBreaches = pgTable(
+  "sla_breaches",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ticketId: uuid("ticket_id")
+      .references(() => tickets.id, { onDelete: "cascade" })
+      .notNull(),
+    policyId: uuid("policy_id").references(() => slaPolicies.id, { onDelete: "set null" }),
+    breachType: varchar("breach_type", { length: 50 }).notNull(), // "first_response" | "resolution"
+    breachedAt: timestamp("breached_at").notNull(),
+    notifiedAt: timestamp("notified_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("idx_sla_breaches_ticket_id").on(table.ticketId)],
+);
+
+export type AutomationRule = typeof automationRules.$inferSelect;
+export type NewAutomationRule = typeof automationRules.$inferInsert;
+export type SLAPolicy = typeof slaPolicies.$inferSelect;
+export type NewSLAPolicy = typeof slaPolicies.$inferInsert;
+export type SLABreach = typeof slaBreaches.$inferSelect;
+export type NewSLABreach = typeof slaBreaches.$inferInsert;
