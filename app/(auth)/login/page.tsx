@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, ArrowLeft, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 type LoginFormValues = {
 	email: string;
@@ -9,6 +11,7 @@ type LoginFormValues = {
 };
 
 const Login = () => {
+	const router = useRouter();
 	const [showPassword, setShowPassword] = useState(false);
 	const {
 		register,
@@ -16,7 +19,19 @@ const Login = () => {
 		formState: { errors },
 	} = useForm<LoginFormValues>();
 
-	const onSubmit = (data: LoginFormValues) => console.log(data);
+	const onSubmit = async (data: LoginFormValues) => {
+		console.log(data);
+		try {
+			const response = await axios.post("/api/auth/login", data);
+			console.log("Login response:", response);
+			if (response.status === 200) {
+				// Handle successful login, e.g., store token, redirect, etc.
+				router.push("/dashboard");
+			}
+		} catch (error) {
+			console.error("Login error:", error);
+		}
+	};
 
 	return (
 		<div className="min-h-screen w-full flex items-center justify-center bg-[#EFE8E2] p-6">
