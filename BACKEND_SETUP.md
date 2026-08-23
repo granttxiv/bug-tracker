@@ -71,10 +71,19 @@ npm run lint          # Run ESLint
 
 ## Database Schema
 
-The schema includes (Phase 1):
+The schema includes:
+
+**Phase 1 (Complete):**
 
 - **users**: User accounts (admin, agent, client)
 - **user_sessions**: JWT session tracking
+
+**Phase 2 (Complete):**
+
+- **tickets**: Core ticket data (title, description, status, priority, etc.)
+- **ticket_comments**: Public replies and internal notes
+- **ticket_activities**: Audit log of all ticket changes
+- **ticket_attachments**: Metadata for file attachments (S3 integration planned for Phase 2.3)
 
 Full schema in: `lib/db/schema.ts`
 
@@ -89,6 +98,11 @@ track_me/
 │   │   │   ├── login/
 │   │   │   ├── logout/
 │   │   │   └── me/
+│   │   ├── tickets/           # Ticket CRUD endpoints
+│   │   │   ├── [id]/
+│   │   │   │   ├── comments/
+│   │   │   │   └── activities/
+│   │   │   └── route.ts       # List & create tickets
 │   │   └── health/            # Health check endpoint
 │   ├── layout.tsx
 │   ├── page.tsx
@@ -96,12 +110,16 @@ track_me/
 ├── lib/
 │   ├── db/
 │   │   ├── client.ts          # Database connection
-│   │   └── schema.ts          # Drizzle schema
+│   │   ├── schema.ts          # Drizzle schema
+│   │   └── tickets.ts         # Ticket queries & operations
 │   ├── auth/
 │   │   ├── password.ts        # Password hashing/verification
 │   │   ├── jwt.ts             # JWT token generation/verification
 │   │   └── middleware.ts      # Auth middleware for endpoints
-│   └── types/                 # Type definitions
+│   ├── types/
+│   │   ├── ticket.ts          # Ticket validation schemas
+│   │   └── attachment.ts      # File attachment schemas
+│   └── s3/                    # S3 utilities (for Phase 2.3)
 ├── drizzle/                   # Generated migrations
 ├── .env.local                 # Environment variables
 ├── drizzle.config.ts          # Drizzle configuration
@@ -112,14 +130,24 @@ track_me/
 
 ```
 
-## API Endpoints (Phase 1)
+## API Endpoints
 
-### Auth
+### Auth (Phase 1)
 
 - `POST /api/auth/register` - Create new user account
 - `POST /api/auth/login` - Login and get JWT token
 - `GET /api/auth/me` - Get current user (requires auth)
 - `POST /api/auth/logout` - Logout (client-side token deletion)
+
+### Tickets (Phase 2)
+
+- `POST /api/tickets` - Create new ticket (clients only)
+- `GET /api/tickets` - List user's tickets (with filtering & pagination)
+  - Query params: `status`, `priority`, `limit`, `offset`
+- `GET /api/tickets/:id` - Get ticket details with comments & attachments
+- `PATCH /api/tickets/:id` - Update ticket (clients can only edit description & reproduction steps)
+- `POST /api/tickets/:id/comments` - Add comment to ticket
+- `GET /api/tickets/:id/activities` - Get audit trail of ticket changes
 
 ### Health
 
@@ -170,10 +198,22 @@ curl http://localhost:3000/api/health
 
 ## Next Steps
 
-- Phase 2: Ticket CRUD, comments, attachments
-- Phase 3: Agent dashboard
+- Phase 2.3: S3 attachments (currently stubbed, MinIO integration pending)
+- Phase 3: Agent dashboard (view all tickets, assign, change status)
 - Phase 4: Automation & SLA
 - ... (see plan.md for full roadmap)
+
+## Activity Logging
+
+All ticket changes are automatically logged to `ticket_activities`:
+
+- Ticket creation
+- Status changes
+- Assignments
+- Comments added
+- Attachment uploads
+
+Retrieve activity via: `GET /api/tickets/:id/activities`
 
 ## Troubleshooting
 
@@ -200,6 +240,17 @@ Error: JWT_SECRET is not set
 ```
 
 → Add JWT_SECRET to .env.local
+
+## Dependencies
+
+- **next**: 16.3.1 - React framework
+- **drizzle-orm**: PostgreSQL ORM
+- **drizzle-kit**: Migration tool
+- **pg**: PostgreSQL driver
+- **jsonwebtoken**: JWT auth
+- **bcryptjs**: Password hashing
+- **zod**: Runtime schema validation
+- **@aws-sdk/client-s3**: S3 client (for future file uploads)
 
 ## Contact & Docs
 

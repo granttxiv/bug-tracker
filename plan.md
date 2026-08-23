@@ -319,6 +319,7 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 - [x] `GET /api/tickets/:id` – Get ticket + comments + attachments
 - [x] `PATCH /api/tickets/:id` – Update (client can only change: description, steps_to_reproduce)
 - [x] `POST /api/tickets/:id/comments` – Add public reply
+- [x] `GET /api/tickets/:id/comments` – Implicit in GET /:id endpoint
 
 #### 2.3 Attachments (S3 Integration)
 
@@ -331,15 +332,22 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 #### 2.4 Activity Audit Log
 
-- [ ] Middleware/hook: log all ticket changes to `ticket_activities`
+- [x] Auto-logging: all ticket changes logged to `ticket_activities`
+  - Ticket creation → logs title, status, priority
+  - Ticket updates → logs old/new values
+  - Comments added → logs comment type
+  - More actions ready: status_changed, assigned, attachment_added
 - [x] `GET /api/tickets/:id/activities` – Return audit trail with user + action
 
 #### 2.5 Testing
 
-- [ ] Create ticket, verify in DB
-- [ ] Upload attachment, verify in S3 + DB
-- [ ] Update ticket, verify activity logged
-- [ ] Test pagination, filters
+- [x] Create ticket, verify in DB
+- [ ] Upload attachment, verify in S3 + DB (deferred)
+- [x] Update ticket, verify activity logged
+- [x] Test pagination, filters
+- [x] Manual testing guide (TESTING.md)
+- [x] Quick test reference (QUICK_TEST.md)
+- [x] Automated test script (test-phase2.sh)
 
 ---
 

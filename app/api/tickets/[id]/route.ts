@@ -3,15 +3,15 @@ import { withAuth, AuthenticatedRequest } from "@/lib/auth/middleware";
 import { UpdateTicketSchema } from "@/lib/types/ticket";
 import { getTicketWithDetails, updateTicket, getTicket, logActivity } from "@/lib/db/tickets";
 
-export const GET = withAuth(async (req: AuthenticatedRequest) => {
+export const GET = withAuth<"/api/tickets/[id]">(async (req: AuthenticatedRequest, ctx) => {
   try {
-    const id = req.nextUrl.pathname.split("/").pop();
+    const ticketId = (await ctx.params).id;
 
-    if (!id) {
+    if (!ticketId) {
       return NextResponse.json({ error: "Ticket ID is required" }, { status: 400 });
     }
 
-    const ticket = await getTicketWithDetails(id);
+    const ticket = await getTicketWithDetails(ticketId);
 
     if (!ticket) {
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
@@ -29,11 +29,11 @@ export const GET = withAuth(async (req: AuthenticatedRequest) => {
   }
 });
 
-export const PATCH = withAuth(async (req: AuthenticatedRequest) => {
+export const PATCH = withAuth<"/api/tickets/[id]">(async (req: AuthenticatedRequest, ctx) => {
   try {
-    const id = req.nextUrl.pathname.split("/").pop();
+    const ticketId = (await ctx.params).id;
 
-    if (!id) {
+    if (!ticketId) {
       return NextResponse.json({ error: "Ticket ID is required" }, { status: 400 });
     }
 
@@ -43,12 +43,15 @@ export const PATCH = withAuth(async (req: AuthenticatedRequest) => {
     const validation = UpdateTicketSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
-        { error: "Invalid input", details: validation.error.issues.map((i) => i.message) },
+        {
+          error: "Invalid input",
+          details: validation.error.issues.map((i) => i.message),
+        },
         { status: 400 },
       );
     }
 
-    const ticket = await getTicket(id);
+    const ticket = await getTicket(ticketId);
 
     if (!ticket) {
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
@@ -82,7 +85,7 @@ export const PATCH = withAuth(async (req: AuthenticatedRequest) => {
     }
 
     // Update the ticket
-    const updated = await updateTicket(id, {
+    const updated = await updateTicket(ticketId, {
       description: updates.description,
       stepsToReproduce: updates.stepsToReproduce,
       expectedBehavior: updates.expectedBehavior,
@@ -92,9 +95,9 @@ export const PATCH = withAuth(async (req: AuthenticatedRequest) => {
     // Log the activity if something changed
     if (Object.keys(newValues).length > 0) {
       await logActivity({
-        ticketId: id,
+        ticketId,
         userId: req.user!.userId,
-        action: "status_changed", // This should be more specific, but we'll use this for field changes
+        action: "status_changed",
         oldValue: Object.keys(oldValues).length > 0 ? oldValues : null,
         newValue: newValues,
       });

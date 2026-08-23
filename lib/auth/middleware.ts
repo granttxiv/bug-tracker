@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken, extractTokenFromHeader, JWTPayload } from "./jwt";
+import { AppRouteHandlerRoutes } from "@/.next/dev/types/routes";
 
 export interface AuthenticatedRequest extends NextRequest {
   user?: JWTPayload;
 }
 
-export function withAuth(handler: (req: AuthenticatedRequest) => Promise<NextResponse>) {
-  return async (req: NextRequest) => {
+/**
+ * @dev loosely typed for RouteContext
+ */
+export function withAuth<Path extends AppRouteHandlerRoutes>(
+  handler: (req: AuthenticatedRequest, ctx: RouteContext<Path>) => Promise<NextResponse>,
+) {
+  return async (req: NextRequest, ctx: RouteContext<Path>) => {
     const token = extractTokenFromHeader(req.headers.get("Authorization") || "");
 
     if (!token) {
@@ -25,18 +31,18 @@ export function withAuth(handler: (req: AuthenticatedRequest) => Promise<NextRes
     }
 
     (req as AuthenticatedRequest).user = payload;
-    return handler(req as AuthenticatedRequest);
+    return handler(req as AuthenticatedRequest, ctx);
   };
 }
 
-export function withRole(
+export function withRole<Path extends AppRouteHandlerRoutes = AppRouteHandlerRoutes>(
   allowedRoles: string[],
-  handler: (req: AuthenticatedRequest) => Promise<NextResponse>,
+  handler: (req: AuthenticatedRequest, ctx: RouteContext<Path>) => Promise<NextResponse>,
 ) {
-  return withAuth(async (req: AuthenticatedRequest) => {
+  return withAuth(async (req: AuthenticatedRequest, ctx: RouteContext<Path>) => {
     if (!req.user || !allowedRoles.includes(req.user.role)) {
       return NextResponse.json({ error: "Forbidden: Insufficient permissions" }, { status: 403 });
     }
-    return handler(req);
+    return handler(req, ctx);
   });
 }

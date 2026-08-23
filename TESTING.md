@@ -214,12 +214,397 @@ You should see the new user with hashed password (not plain text).
 
 ---
 
-## Next: Phase 2 Testing
+---
 
-Once Phase 2 (Ticket CRUD) is complete, we'll add tests for:
+## Phase 2: Ticket CRUD Testing
 
-- POST /api/tickets
-- GET /api/tickets
-- PATCH /api/tickets/:id
-- Attachments
-- Activity audit log
+### Prerequisites
+
+1. Register a client user (see Phase 1 above)
+2. Save the JWT token from registration/login
+3. Note the client's user ID from the response
+
+### 1. Create a Ticket
+
+**Endpoint**: `POST http://localhost:3000/api/tickets`
+
+**Headers**:
+
+```
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+```
+
+**Request Body**:
+
+```json
+{
+  "title": "Login button not working on mobile",
+  "description": "The login button is unresponsive when using mobile devices. It works fine on desktop.",
+  "type": "bug",
+  "priority": "high",
+  "version": "2.1.0",
+  "environment": "production",
+  "stepsToReproduce": "1. Go to app on mobile\n2. Click login button\n3. Nothing happens",
+  "expectedBehavior": "Login form should appear",
+  "actualBehavior": "Button is unresponsive"
+}
+```
+
+**Expected Response** (201):
+
+```json
+{
+  "id": "uuid-here",
+  "clientId": "uuid-of-logged-in-user",
+  "title": "Login button not working on mobile",
+  "description": "The login button is unresponsive...",
+  "type": "bug",
+  "priority": "high",
+  "status": "new",
+  "version": "2.1.0",
+  "environment": "production",
+  "stepsToReproduce": "1. Go to app on mobile...",
+  "expectedBehavior": "Login form should appear",
+  "actualBehavior": "Button is unresponsive",
+  "assignedTo": null,
+  "resolvedAt": null,
+  "closedAt": null,
+  "createdAt": "2024-01-15T10:30:00.000Z",
+  "updatedAt": "2024-01-15T10:30:00.000Z"
+}
+```
+
+**Save the ticket ID** for next tests.
+
+---
+
+### 2. List All Tickets for Client
+
+**Endpoint**: `GET http://localhost:3000/api/tickets`
+
+**Headers**:
+
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+**Optional Query Parameters**:
+
+```
+?status=new&priority=high&limit=20&offset=0
+```
+
+**Expected Response** (200):
+
+```json
+{
+  "tickets": [
+    {
+      "id": "ticket-uuid",
+      "clientId": "uuid-of-logged-in-user",
+      "title": "Login button not working on mobile",
+      "status": "new",
+      "priority": "high",
+      "createdAt": "2024-01-15T10:30:00.000Z",
+      ...
+    }
+  ],
+  "total": 1,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+---
+
+### 3. Get Ticket Details
+
+**Endpoint**: `GET http://localhost:3000/api/tickets/{ticket-id}`
+
+**Headers**:
+
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+**Expected Response** (200):
+
+```json
+{
+  "id": "ticket-uuid",
+  "clientId": "uuid-of-logged-in-user",
+  "title": "Login button not working on mobile",
+  "description": "The login button is unresponsive...",
+  "type": "bug",
+  "priority": "high",
+  "status": "new",
+  "version": "2.1.0",
+  "environment": "production",
+  "stepsToReproduce": "1. Go to app on mobile...",
+  "expectedBehavior": "Login form should appear",
+  "actualBehavior": "Button is unresponsive",
+  "assignedTo": null,
+  "resolvedAt": null,
+  "closedAt": null,
+  "createdAt": "2024-01-15T10:30:00.000Z",
+  "updatedAt": "2024-01-15T10:30:00.000Z",
+  "comments": [],
+  "attachments": [],
+  "assignedUser": null
+}
+```
+
+---
+
+### 4. Update Ticket (Client can only update description & steps)
+
+**Endpoint**: `PATCH http://localhost:3000/api/tickets/{ticket-id}`
+
+**Headers**:
+
+```
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+```
+
+**Request Body**:
+
+```json
+{
+  "description": "Updated: The login button appears to be frozen on all mobile browsers.",
+  "stepsToReproduce": "1. Go to app on iOS Safari\n2. Click login button\n3. No response"
+}
+```
+
+**Expected Response** (200):
+
+```json
+{
+  "id": "ticket-uuid",
+  "description": "Updated: The login button appears to be frozen on all mobile browsers.",
+  "stepsToReproduce": "1. Go to app on iOS Safari...",
+  "updatedAt": "2024-01-15T10:35:00.000Z",
+  ...
+}
+```
+
+---
+
+### 5. Add Comment to Ticket
+
+**Endpoint**: `POST http://localhost:3000/api/tickets/{ticket-id}/comments`
+
+**Headers**:
+
+```
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+```
+
+**Request Body**:
+
+```json
+{
+  "body": "I've also experienced this issue on Android. The button is completely unresponsive.",
+  "type": "public_reply"
+}
+```
+
+**Expected Response** (201):
+
+```json
+{
+  "id": "comment-uuid",
+  "ticketId": "ticket-uuid",
+  "userId": "uuid-of-logged-in-user",
+  "body": "I've also experienced this issue on Android...",
+  "type": "public_reply",
+  "createdAt": "2024-01-15T10:40:00.000Z",
+  "updatedAt": "2024-01-15T10:40:00.000Z"
+}
+```
+
+---
+
+### 6. Get Ticket Activities (Audit Trail)
+
+**Endpoint**: `GET http://localhost:3000/api/tickets/{ticket-id}/activities`
+
+**Headers**:
+
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+**Expected Response** (200):
+
+```json
+[
+  {
+    "id": "activity-uuid-3",
+    "ticketId": "ticket-uuid",
+    "userId": "uuid-of-logged-in-user",
+    "action": "commented",
+    "oldValue": null,
+    "newValue": {
+      "commentType": "public_reply",
+      "commentId": "comment-uuid"
+    },
+    "createdAt": "2024-01-15T10:40:00.000Z"
+  },
+  {
+    "id": "activity-uuid-2",
+    "ticketId": "ticket-uuid",
+    "userId": "uuid-of-logged-in-user",
+    "action": "status_changed",
+    "oldValue": {
+      "description": "The login button is unresponsive...",
+      "stepsToReproduce": "1. Go to app on mobile\n2. Click login button\n3. Nothing happens"
+    },
+    "newValue": {
+      "description": "Updated: The login button appears to be frozen on all mobile browsers.",
+      "stepsToReproduce": "1. Go to app on iOS Safari..."
+    },
+    "createdAt": "2024-01-15T10:35:00.000Z"
+  },
+  {
+    "id": "activity-uuid-1",
+    "ticketId": "ticket-uuid",
+    "userId": "uuid-of-logged-in-user",
+    "action": "created",
+    "oldValue": null,
+    "newValue": {
+      "title": "Login button not working on mobile",
+      "status": "new",
+      "priority": "high"
+    },
+    "createdAt": "2024-01-15T10:30:00.000Z"
+  }
+]
+```
+
+---
+
+## Error Scenarios
+
+### Unauthorized Access (Client tries to view another client's ticket)
+
+```
+GET /api/tickets/{other-clients-ticket-id}
+→ 403 { "error": "You don't have access to this ticket" }
+```
+
+### Ticket Not Found
+
+```
+GET /api/tickets/invalid-uuid
+→ 404 { "error": "Ticket not found" }
+```
+
+### Invalid Input (Missing required fields)
+
+```
+POST /api/tickets with missing "title"
+→ 400 { "error": "Invalid input", "details": [...] }
+```
+
+### Validation Errors
+
+```
+POST /api/tickets with title="short"
+→ 400 { "error": "Invalid input", "details": [{ "path": ["title"], "message": "String must contain at least 5 character(s)" }] }
+```
+
+---
+
+## Curl Examples (Phase 2)
+
+### Create Ticket
+
+```bash
+curl -X POST http://localhost:3000/api/tickets \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Login button not working",
+    "description": "The login button is unresponsive on mobile devices.",
+    "type": "bug",
+    "priority": "high",
+    "version": "2.1.0",
+    "environment": "production"
+  }'
+```
+
+### List Tickets
+
+```bash
+curl -X GET "http://localhost:3000/api/tickets?status=new&limit=10" \
+  -H "Authorization: Bearer TOKEN"
+```
+
+### Get Ticket Details
+
+```bash
+curl -X GET http://localhost:3000/api/tickets/TICKET_ID \
+  -H "Authorization: Bearer TOKEN"
+```
+
+### Update Ticket
+
+```bash
+curl -X PATCH http://localhost:3000/api/tickets/TICKET_ID \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "description": "Updated description here",
+    "stepsToReproduce": "Updated steps here"
+  }'
+```
+
+### Add Comment
+
+```bash
+curl -X POST http://localhost:3000/api/tickets/TICKET_ID/comments \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "body": "This is my comment",
+    "type": "public_reply"
+  }'
+```
+
+### Get Activities
+
+```bash
+curl -X GET http://localhost:3000/api/tickets/TICKET_ID/activities \
+  -H "Authorization: Bearer TOKEN"
+```
+
+---
+
+## Database Verification (Phase 2)
+
+After testing, verify data in PostgreSQL:
+
+```sql
+-- View all tickets
+SELECT * FROM tickets;
+
+-- View comments for a ticket
+SELECT * FROM ticket_comments WHERE ticket_id = 'your-ticket-uuid';
+
+-- View activity log for a ticket
+SELECT * FROM ticket_activities WHERE ticket_id = 'your-ticket-uuid' ORDER BY created_at DESC;
+
+-- View all users
+SELECT id, email, name, role FROM users;
+```
+
+---
+
+## Next Steps
+
+- Phase 2.3: S3/MinIO file attachments (stubbed, not yet implemented)
+- Phase 3: Agent dashboard (view all tickets, assign, change status)
+- Phase
