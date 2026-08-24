@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import AddItemButton from "../addItem/page";
+import AddItemButton from "../../(components)/addItem/page";
 import { EllipsisVertical, Pencil, Trash2 } from "lucide-react";
 import {
 	Popover,
