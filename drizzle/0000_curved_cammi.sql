@@ -113,6 +113,7 @@ CREATE TABLE "user_sessions" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
+	"test_column" text,
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"password_hash" varchar(255) NOT NULL,

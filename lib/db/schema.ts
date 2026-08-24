@@ -34,6 +34,7 @@ export const commentTypeEnum = pgEnum("comment_type", ["public_reply", "internal
 
 // Users table
 export const users = pgTable("users", {
+  test_column: text("test_column"),
   id: uuid("id").primaryKey().defaultRandom(),
   email: varchar("email", { length: 255 }).unique().notNull(),
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
