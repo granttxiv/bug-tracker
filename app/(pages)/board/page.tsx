@@ -25,15 +25,15 @@ const statusLabel: Record<string, string> = {
 };
 
 const statusColor: Record<string, string> = {
-	pending: "bg-blue-500",
-	"in-progress": "bg-yellow-500",
-	completed: "bg-green-500",
+	pending: "bg-sky-100 text-sky-700",
+	"in-progress": "bg-amber-100 text-amber-700",
+	completed: "bg-emerald-100 text-emerald-700",
 };
 
 const priorityColor: Record<string, string> = {
-	High: "bg-red-500",
-	Medium: "bg-yellow-500",
-	Low: "bg-green-500",
+	High: "bg-red-100 text-red-700",
+	Medium: "bg-amber-100 text-amber-700",
+	Low: "bg-emerald-100 text-emerald-700",
 };
 
 function TaskCard({
@@ -46,21 +46,26 @@ function TaskCard({
 	onEdit: (task: Task) => void;
 }) {
 	return (
-		<div className="bg-white rounded-xl p-4 shadow-sm flex justify-between">
-			<div>
-				<h3 className="font-semibold">{task.title}</h3>
-				<p className="text-sm text-gray-600">{task.description}</p>
+		<div className="flex justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md">
+			<div className="min-w-0">
+				<p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+					Task
+				</p>
+				<h3 className="font-semibold text-slate-800">{task.title}</h3>
+				<p className="mt-1 text-sm leading-5 text-slate-500">
+					{task.description}
+				</p>
 			</div>
 			<div className="flex gap-2 items-start">
 				<p
-					className={`text-sm text-black border w-fit rounded-2xl px-2 ${priorityColor[task.priority]}`}
+					className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${priorityColor[task.priority]}`}
 				>
-					Priority: {task.priority}
+					{task.priority}
 				</p>
 				<p
-					className={`text-sm text-black border w-fit rounded-2xl px-2 ${statusColor[task.status]}`}
+					className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${statusColor[task.status]}`}
 				>
-					Status: {statusLabel[task.status]}
+					{statusLabel[task.status]}
 				</p>
 				<Popover>
 					<PopoverTrigger
@@ -70,7 +75,7 @@ function TaskCard({
 					</PopoverTrigger>
 					<PopoverContent className="w-32 p-1 bg-white">
 						<button
-							className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-gray-100"
+							className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-slate-100"
 							onClick={() => onEdit(task)}
 						>
 							<Pencil size={14} />
@@ -114,21 +119,39 @@ export default function Board() {
 	};
 
 	return (
-		<div className="flex flex-col flex-1 font-sans bg-gray-100 min-h-screen">
-			<div className="flex justify-end p-4">
-				<AddItemButton onAdd={handleAddTask} />
+		<div className="min-h-screen flex-1 bg-slate-100 p-5 text-slate-900 md:p-8">
+			<div className="mx-auto max-w-7xl">
+				<header className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+					<div>
+						<p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+							Product workspace
+						</p>
+						<h1 className="mt-2 text-3xl font-bold tracking-tight">Board</h1>
+						<p className="mt-2 text-sm text-slate-500">
+							Move work forward and keep blockers visible.
+						</p>
+					</div>
+					<div className="flex justify-end">
+						<AddItemButton onAdd={handleAddTask} />
+					</div>
+				</header>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 mb-4">
+			<div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 md:grid-cols-3">
 				{STATUSES.map((s) => (
 					<div
 						key={s}
-						className="flex flex-col border-gray-300 border-2 rounded-xl p-3  min-h-[320px]"
+						className="flex min-h-120 flex-col rounded-2xl border border-slate-200 bg-slate-50 p-3"
 					>
-						<h2 className="text-lg font-semibold mb-2 capitalize">
-							{statusLabel[s]}
-						</h2>
-						<div className="flex flex-col gap-2">
+						<div className="mb-3 flex items-center justify-between">
+							<h2 className="text-sm font-bold uppercase tracking-[0.12em] text-slate-600">
+								{statusLabel[s]}
+							</h2>
+							<span className="rounded-full bg-white px-2 py-1 text-xs font-semibold text-slate-400">
+								{tasks.filter((task) => task.status === s).length}
+							</span>
+						</div>
+						<div className="flex flex-col gap-3">
 							{tasks
 								.filter((task) => task.status === s)
 								.map((task) => (

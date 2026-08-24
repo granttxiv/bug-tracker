@@ -1,73 +1,124 @@
 "use client";
-import Image from "next/image";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Menu, Plus, Search, X } from "lucide-react";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
 
-const NavHeader = ({ className }: { className: string }) => {
+const navigation = [
+	{ href: "/dashboard", label: "Overview" },
+	{ href: "/issues", label: "Issues" },
+	{ href: "/board", label: "Board" },
+	{ href: "/backlog", label: "Backlog" },
+];
+
+const NavHeader = ({ className = "" }: { className?: string }) => {
+	const pathname = usePathname();
 	const [isOpen, setIsOpen] = useState(false);
-	return (
-		<>
-			<nav className={`p-4 ${className}`}>
-				<div className="container mx-auto flex items-center justify-between px-4 w-full">
-					<Link href="/" className="text-white font-bold text-lg">
-						Bug Tracker
-					</Link>
-					<nav className="flex-nowrap items-center space-x-4 whitespace-nowrap hidden sm:flex">
-						<Link href="/backlog" className="text-white hover:text-gray-300">
-							Backlog
-						</Link>
-						<Link href="/board" className="text-white hover:text-gray-300">
-							Board
-						</Link>
-						<Link href="/issues" className="text-white hover:text-gray-300">
-							Issues
-						</Link>
-						<Link href="/dashboard" className="text-white hover:text-gray-300">
-							Dashboard
-						</Link>
-						<Link href="/settings" className="text-white hover:text-gray-300">
-							Settings
-						</Link>
-						<div className="flex items-center space-x-2">
-							<Image
-								src="/images.png"
-								alt="Profile"
-								width={32}
-								height={32}
-								className="rounded-full cursor-pointer"
-								onClick={() => setIsOpen((prev) => !prev)}
-							/>
-						</div>
-						{/* {isOpen && (
-							<div className="absolute right-4 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
-								<Link
-									href="/profile"
-									className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-								>
-									Profile
-								</Link>
-								<Link
-									href="/logout"
-									className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-								>
-									Logout
-								</Link>
-							</div>
-						)} */}
-					</nav>
-					<div className="sm:hidden">
-						<button
-							onClick={() => setIsOpen((prev) => !prev)}
-							className="text-white focus:outline-none cursor-pointer"
-						>
-							{isOpen ? <X size={24} /> : <Menu size={24} />}
-						</button>
-					</div>
 
+	return (
+		<header className={`border-b border-slate-200 bg-white ${className}`}>
+			<nav
+				className="mx-auto flex min-h-16 max-w-[1600px] items-center gap-4 px-4 sm:px-6"
+				aria-label="Primary navigation"
+			>
+				<Link
+					href="/"
+					className="flex shrink-0 items-center gap-2 text-slate-900"
+				>
+					<span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-700 text-sm font-black text-white">
+						B
+					</span>
+					<span className="hidden text-sm font-bold tracking-tight sm:inline">
+						Bug Tracker
+					</span>
+				</Link>
+
+				<div className="hidden h-8 w-px bg-slate-200 md:block" />
+				<div className="relative hidden max-w-xs flex-1 md:block">
+					<Search
+						size={16}
+						className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+					/>
+					<input
+						aria-label="Search"
+						placeholder="Search issues"
+						className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white"
+					/>
+				</div>
+
+				<div className="hidden items-center gap-1 lg:flex">
+					{navigation.map((item) => {
+						const isActive =
+							pathname === item.href || pathname.startsWith(`${item.href}/`);
+						return (
+							<Link
+								key={item.href}
+								href={item.href}
+								className={`rounded-lg px-3 py-2 text-sm font-medium transition ${isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
+							>
+								{item.label}
+							</Link>
+						);
+					})}
+				</div>
+
+				<div className="ml-auto flex items-center gap-2">
+					<Link
+						href="/issues"
+						className="hidden items-center gap-1.5 rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600 sm:inline-flex"
+					>
+						<Plus size={16} />
+						Create
+					</Link>
+					<Link
+						href="/settings"
+						aria-label="Open settings"
+						className={`flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700 ring-2 ring-white transition hover:bg-slate-200 ${pathname === "/settings" ? "ring-blue-200" : ""}`}
+					>
+						AM
+					</Link>
+					<button
+						type="button"
+						onClick={() => setIsOpen((value) => !value)}
+						aria-label={
+							isOpen ? "Close navigation menu" : "Open navigation menu"
+						}
+						className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+					>
+						{isOpen ? <X size={20} /> : <Menu size={20} />}
+					</button>
 				</div>
 			</nav>
-		</>
+
+			{isOpen && (
+				<div className="border-t border-slate-200 bg-white px-4 py-3 lg:hidden">
+					<div className="mb-3 relative">
+						<Search
+							size={16}
+							className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+						/>
+						<input
+							aria-label="Search"
+							placeholder="Search issues"
+							className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 text-sm outline-none focus:border-blue-500"
+						/>
+					</div>
+					<div className="grid gap-1">
+						{navigation.map((item) => (
+							<Link
+								key={item.href}
+								href={item.href}
+								onClick={() => setIsOpen(false)}
+								className={`rounded-lg px-3 py-2 text-sm font-medium ${pathname === item.href ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"}`}
+							>
+								{item.label}
+							</Link>
+						))}
+					</div>
+				</div>
+			)}
+		</header>
 	);
 };
 

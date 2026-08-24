@@ -6,7 +6,6 @@ import {
 	PopoverContent,
 	PopoverDescription,
 	PopoverHeader,
-	PopoverTitle,
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { useState } from "react";
@@ -40,13 +39,13 @@ const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger
 				render={
-					<button className="flex w-45 items-center space-x-2 rounded-2xl bg-blue-800 px-5 py-3.5 font-semibold text-white hover:bg-blue-700 mt-3.5" />
+					<button className="mt-3.5 flex items-center space-x-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600" />
 				}
 			>
 				<Plus size={20} />
 				<span>Create a task</span>
 			</PopoverTrigger>
-			<PopoverContent className="w-100 bg-white p-4 rounded-lg shadow-lg">
+			<PopoverContent className="w-100 rounded-xl border border-slate-200 bg-white p-5 shadow-xl">
 				<PopoverHeader>
 					<PopoverDescription>
 						Create a new item for your tracker.
@@ -55,7 +54,7 @@ const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
 				<label className="flex flex-col gap-1">
 					<span className="text-xs font-medium">Title</span>
 					<input
-						className="rounded border border-gray-300 px-2 py-1.5 outline-none focus:border-blue-500"
+						className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 outline-none transition focus:border-blue-500 focus:bg-white"
 						placeholder="Enter a title"
 						type="text"
 						required
@@ -66,7 +65,7 @@ const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
 				<label className="flex flex-col gap-1">
 					<span className="text-xs font-medium">Description</span>
 					<textarea
-						className="rounded border border-gray-300 px-2 py-1.5 outline-none focus:border-blue-500"
+						className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 outline-none transition focus:border-blue-500 focus:bg-white"
 						placeholder="Enter a description"
 						rows={3}
 						value={description}
@@ -76,7 +75,7 @@ const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
 				<label className="flex flex-col gap-1">
 					<span className="text-xs font-medium">Priority</span>
 					<select
-						className="rounded border border-gray-300 px-2 py-1.5 outline-none focus:border-blue-500"
+						className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 outline-none transition focus:border-blue-500 focus:bg-white"
 						value={priority}
 						onChange={(e) => setPriority(e.target.value)}
 					>
@@ -104,12 +103,12 @@ const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
 						<input
 							type="radio"
 							name="status"
-                value="in-progress"
-								required
-                checked={status === "in-progress"}
-                onChange={(e) => setStatus(e.target.value)}
-                className="mr-2 accent-yellow-500"
-              />
+							value="in-progress"
+							required
+							checked={status === "in-progress"}
+							onChange={(e) => setStatus(e.target.value)}
+							className="mr-2 accent-yellow-500"
+						/>
 						In Progress
 					</label>
 
@@ -126,7 +125,7 @@ const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
 					</label>
 				</label>
 				<button
-					className="rounded bg-blue-500 px-3 py-1.5 font-medium text-white hover:bg-blue-600"
+					className="mt-2 rounded-lg bg-blue-700 px-4 py-2 font-semibold text-white transition hover:bg-blue-600"
 					onClick={handleSubmit}
 				>
 					Create item
