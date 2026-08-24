@@ -96,7 +96,13 @@ function TaskCard({
 }
 
 export default function Board() {
-	const [tasks, setTasks] = useState<Task[]>([]);
+	const [tasks, setTasks] = useState<Task[]>(() => {
+		if (typeof window === "undefined") return [];
+		const pendingTask = localStorage.getItem("bug_tracker_pending_task");
+		if (!pendingTask) return [];
+		localStorage.removeItem("bug_tracker_pending_task");
+		return [{ id: crypto.randomUUID(), ...JSON.parse(pendingTask) }];
+	});
 
 	const handleAddTask = (
 		title: string,
@@ -115,7 +121,11 @@ export default function Board() {
 	};
 
 	const handleEditTask = (task: Task) => {
-		console.log("Edit not implemented yet", task);
+		const title = window.prompt("Update task title", task.title)?.trim();
+		if (!title) return;
+		setTasks((prev) =>
+			prev.map((item) => (item.id === task.id ? { ...item, title } : item)),
+		);
 	};
 
 	return (

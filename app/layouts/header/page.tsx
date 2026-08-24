@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, Plus, Search, X } from "lucide-react";
 import { useState } from "react";
 
@@ -14,7 +14,15 @@ const navigation = [
 
 const NavHeader = ({ className = "" }: { className?: string }) => {
 	const pathname = usePathname();
+	const router = useRouter();
 	const [isOpen, setIsOpen] = useState(false);
+	const [search, setSearch] = useState("");
+
+	const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const query = search.trim();
+		if (query) router.push(`/issues?search=${encodeURIComponent(query)}`);
+	};
 
 	return (
 		<header className={`border-b border-slate-200 bg-white ${className}`}>
@@ -35,7 +43,10 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 				</Link>
 
 				<div className="hidden h-8 w-px bg-slate-200 md:block" />
-				<div className="relative hidden max-w-xs flex-1 md:block">
+				<form
+					onSubmit={submitSearch}
+					className="relative hidden max-w-xs flex-1 md:block"
+				>
 					<Search
 						size={16}
 						className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -43,9 +54,11 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 					<input
 						aria-label="Search"
 						placeholder="Search issues"
+						value={search}
+						onChange={(event) => setSearch(event.target.value)}
 						className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white"
 					/>
-				</div>
+				</form>
 
 				<div className="hidden items-center gap-1 lg:flex">
 					{navigation.map((item) => {
@@ -93,7 +106,7 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 
 			{isOpen && (
 				<div className="border-t border-slate-200 bg-white px-4 py-3 lg:hidden">
-					<div className="mb-3 relative">
+					<form onSubmit={submitSearch} className="relative mb-3">
 						<Search
 							size={16}
 							className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -101,9 +114,11 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 						<input
 							aria-label="Search"
 							placeholder="Search issues"
+							value={search}
+							onChange={(event) => setSearch(event.target.value)}
 							className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 text-sm outline-none focus:border-blue-500"
 						/>
-					</div>
+					</form>
 					<div className="grid gap-1">
 						{navigation.map((item) => (
 							<Link

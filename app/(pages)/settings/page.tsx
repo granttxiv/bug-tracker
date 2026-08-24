@@ -80,9 +80,13 @@ export default function SettingsPage() {
 	const [lastSaved, setLastSaved] = useState("Loading profile...");
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
+	const [accentColor, setAccentColor] = useState("bg-blue-600");
 
 	useEffect(() => {
-		const token = typeof window !== "undefined" ? localStorage.getItem("bug_tracker_token") : null;
+		const token =
+			typeof window !== "undefined"
+				? localStorage.getItem("bug_tracker_token")
+				: null;
 
 		if (!token) {
 			router.push("/login");
@@ -142,7 +146,10 @@ export default function SettingsPage() {
 			return;
 		}
 
-		const token = typeof window !== "undefined" ? localStorage.getItem("bug_tracker_token") : null;
+		const token =
+			typeof window !== "undefined"
+				? localStorage.getItem("bug_tracker_token")
+				: null;
 		if (!token) {
 			router.push("/login");
 			return;
@@ -182,7 +189,9 @@ export default function SettingsPage() {
 				`Saved at ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`,
 			);
 		} catch (error) {
-			setLastSaved(error instanceof Error ? error.message : "Unable to save profile");
+			setLastSaved(
+				error instanceof Error ? error.message : "Unable to save profile",
+			);
 		} finally {
 			setIsSaving(false);
 		}
@@ -488,8 +497,10 @@ export default function SettingsPage() {
 											<button
 												key={color}
 												type="button"
-												className={`h-9 w-9 rounded-full ${color} ring-2 ring-white shadow-sm`}
+												onClick={() => setAccentColor(color)}
+												className={`h-9 w-9 rounded-full ${color} ring-2 shadow-sm ${accentColor === color ? "ring-slate-900" : "ring-white"}`}
 												aria-label="Accent color"
+												aria-pressed={accentColor === color}
 											/>
 										))}
 									</div>

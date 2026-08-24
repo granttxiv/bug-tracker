@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import { ArrowUpRight, Filter, Plus, Search } from "lucide-react";
 
 type Issue = {
@@ -101,19 +102,49 @@ const statusClasses: Record<Issue["status"], string> = {
 const IssuesPage = () => {
 	const [activeFilter, setActiveFilter] =
 		useState<(typeof filters)[number]>("All");
-	const [search, setSearch] = useState("");
+	const [search, setSearch] = useState(() =>
+		typeof window === "undefined"
+			? ""
+			: (new URLSearchParams(window.location.search).get("search") ?? ""),
+	);
+	const [showFilters, setShowFilters] = useState(true);
+	const [actionMessage, setActionMessage] = useState("");
 
-	const filteredIssues = useMemo(() => {
-		return issueData.filter((issue) => {
-			const matchesFilter =
-				activeFilter === "All" ? true : issue.status === activeFilter;
-			const matchesSearch = `${issue.title} ${issue.project} ${issue.assignee}`
-				.toLowerCase()
-				.includes(search.toLowerCase());
+	const exportIssues = () => {
+		const csv = [
+			"ID,Title,Project,Priority,Status,Assignee",
+			...filteredIssues.map((issue) =>
+				[
+					issue.id,
+					issue.title,
+					issue.project,
+					issue.priority,
+					issue.status,
+					issue.assignee,
+				]
+					.map((value) => `"${value.replaceAll('"', '""')}"`)
+					.join(","),
+			),
+		].join("\n");
+		const link = document.createElement("a");
+		link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+		link.download = "bug-tracker-issues.csv";
+		link.click();
+		URL.revokeObjectURL(link.href);
+		setActionMessage(
+			`Exported ${filteredIssues.length} issue${filteredIssues.length === 1 ? "" : "s"}.`,
+		);
+	};
 
-			return matchesFilter && matchesSearch;
-		});
-	}, [activeFilter, search]);
+	const filteredIssues = issueData.filter((issue) => {
+		const matchesFilter =
+			activeFilter === "All" ? true : issue.status === activeFilter;
+		const matchesSearch = `${issue.title} ${issue.project} ${issue.assignee}`
+			.toLowerCase()
+			.includes(search.toLowerCase());
+
+		return matchesFilter && matchesSearch;
+	});
 
 	return (
 		<main className="min-h-screen bg-slate-100 p-5 text-slate-900 md:p-8">
@@ -128,14 +159,22 @@ const IssuesPage = () => {
 						</h1>
 					</div>
 					<div className="flex items-center gap-3">
-						<button className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+						<button
+							type="button"
+							onClick={() => setShowFilters((value) => !value)}
+							aria-pressed={showFilters}
+							className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+						>
 							<Filter size={16} />
 							Filter
 						</button>
-						<button className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600">
+						<Link
+							href="/addItem"
+							className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600"
+						>
 							<Plus size={16} />
 							New issue
-						</button>
+						</Link>
 					</div>
 				</header>
 
@@ -163,22 +202,24 @@ const IssuesPage = () => {
 
 				<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
 					<div className="flex flex-col gap-4 border-b border-slate-200 pb-4 lg:flex-row lg:items-center lg:justify-between">
-						<div className="flex flex-wrap gap-2">
-							{filters.map((filter) => (
-								<button
-									key={filter}
-									type="button"
-									onClick={() => setActiveFilter(filter)}
-									className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
-										activeFilter === filter
-											? "bg-blue-700 text-white"
-											: "bg-slate-100 text-slate-600 hover:bg-slate-200"
-									}`}
-								>
-									{filter}
-								</button>
-							))}
-						</div>
+						{showFilters && (
+							<div className="flex flex-wrap gap-2">
+								{filters.map((filter) => (
+									<button
+										key={filter}
+										type="button"
+										onClick={() => setActiveFilter(filter)}
+										className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
+											activeFilter === filter
+												? "bg-blue-700 text-white"
+												: "bg-slate-100 text-slate-600 hover:bg-slate-200"
+										}`}
+									>
+										{filter}
+									</button>
+								))}
+							</div>
+						)}
 
 						<label className="relative block w-full max-w-sm">
 							<Search
@@ -195,7 +236,10 @@ const IssuesPage = () => {
 						</label>
 					</div>
 
-					<div className="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+					<div
+						id="issue-table"
+						className="mt-5 overflow-hidden rounded-2xl border border-slate-200"
+					>
 						<table className="min-w-full divide-y divide-slate-200 text-left">
 							<thead className="bg-slate-50 text-sm text-slate-500">
 								<tr>
@@ -270,10 +314,13 @@ const IssuesPage = () => {
 					<div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 						<div className="mb-4 flex items-center justify-between">
 							<h2 className="text-xl font-semibold">Issue summary</h2>
-							<button className="inline-flex items-center gap-1 text-sm font-medium text-blue-700 hover:text-blue-600">
+							<Link
+								href="#issue-table"
+								className="inline-flex items-center gap-1 text-sm font-medium text-blue-700 hover:text-blue-600"
+							>
 								Open details
 								<ArrowUpRight size={16} />
-							</button>
+							</Link>
 						</div>
 
 						<div className="space-y-4">
@@ -302,19 +349,42 @@ const IssuesPage = () => {
 						<h2 className="mt-2 text-xl font-semibold">Quick actions</h2>
 
 						<div className="mt-5 space-y-3">
-							<button className="flex w-full items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+							<button
+								type="button"
+								onClick={() => {
+									setActiveFilter("In progress");
+									setActionMessage("Showing issues currently in progress.");
+								}}
+								className="flex w-full items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+							>
 								<span>Assign to sprint</span>
 								<ArrowUpRight size={16} />
 							</button>
-							<button className="flex w-full items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+							<button
+								type="button"
+								onClick={exportIssues}
+								className="flex w-full items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+							>
 								<span>Export issue list</span>
 								<ArrowUpRight size={16} />
 							</button>
-							<button className="flex w-full items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+							<button
+								type="button"
+								onClick={() => {
+									navigator.clipboard?.writeText(window.location.href);
+									setActionMessage("Issue report link copied.");
+								}}
+								className="flex w-full items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+							>
 								<span>Share report</span>
 								<ArrowUpRight size={16} />
 							</button>
 						</div>
+						{actionMessage && (
+							<p className="mt-3 text-xs font-medium text-emerald-600">
+								{actionMessage}
+							</p>
+						)}
 					</div>
 				</section>
 			</div>

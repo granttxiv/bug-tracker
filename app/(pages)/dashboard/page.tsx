@@ -1,3 +1,8 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+
 const stats = [
 	{ label: "Total issues", value: "128", change: "+12%", tone: "blue" },
 	{ label: "In progress", value: "18", change: "+4", tone: "amber" },
@@ -79,6 +84,20 @@ const priorityClasses: Record<string, string> = {
 };
 
 const Dashboard = () => {
+	const [period, setPeriod] = useState("This week");
+
+	const downloadReport = () => {
+		const report = [
+			"Metric,Value",
+			...stats.map((stat) => `${stat.label},${stat.value}`),
+		].join("\n");
+		const link = document.createElement("a");
+		link.href = URL.createObjectURL(new Blob([report], { type: "text/csv" }));
+		link.download = "bug-tracker-report.csv";
+		link.click();
+		URL.revokeObjectURL(link.href);
+	};
+
 	return (
 		<main className="min-h-screen bg-slate-100 p-6 text-slate-900">
 			<div className="mx-auto max-w-7xl space-y-6">
@@ -92,10 +111,22 @@ const Dashboard = () => {
 						</h1>
 					</div>
 					<div className="flex items-center gap-3">
-						<button className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-							This week
+						<button
+							type="button"
+							onClick={() =>
+								setPeriod((value) =>
+									value === "This week" ? "Last week" : "This week",
+								)
+							}
+							className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+						>
+							{period}
 						</button>
-						<button className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600">
+						<button
+							type="button"
+							onClick={downloadReport}
+							className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600"
+						>
 							+ New report
 						</button>
 					</div>
@@ -199,12 +230,12 @@ const Dashboard = () => {
 								<p className="text-sm text-slate-500">Latest tasks</p>
 								<h3 className="text-xl font-semibold">Recent bugs</h3>
 							</div>
-							<a
-								href="#"
+							<Link
+								href="/issues"
 								className="text-sm font-medium text-blue-700 hover:text-blue-600"
 							>
 								View all
-							</a>
+							</Link>
 						</div>
 
 						<div className="overflow-hidden rounded-2xl border border-slate-200">

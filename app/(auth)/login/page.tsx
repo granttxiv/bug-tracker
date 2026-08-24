@@ -15,6 +15,7 @@ const Login = () => {
 	const router = useRouter();
 	const [showPassword, setShowPassword] = useState(false);
 	const [submitError, setSubmitError] = useState("");
+	const [recoveryMessage, setRecoveryMessage] = useState("");
 	const {
 		register,
 		handleSubmit,
@@ -118,6 +119,11 @@ const Login = () => {
 						<div className="flex justify-between gap-4">
 							<button
 								type="button"
+								onClick={() =>
+									setRecoveryMessage(
+										"Password recovery is not configured yet. Contact your workspace admin.",
+									)
+								}
 								className="text-xs font-medium text-slate-500 transition hover:text-slate-900"
 							>
 								Forgot password?
@@ -129,6 +135,9 @@ const Login = () => {
 								Create account
 							</Link>
 						</div>
+						{recoveryMessage && (
+							<p className="text-xs text-slate-500">{recoveryMessage}</p>
+						)}
 						{submitError && (
 							<p className="text-sm text-red-600">{submitError}</p>
 						)}

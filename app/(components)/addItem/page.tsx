@@ -9,9 +9,10 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type AddItemButtonProps = {
-	onAdd: (
+	onAdd?: (
 		title: string,
 		description: string,
 		priority: string,
@@ -20,6 +21,7 @@ type AddItemButtonProps = {
 };
 
 const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
+	const router = useRouter();
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
 	const [priority, setPriority] = useState("Low");
@@ -28,7 +30,15 @@ const AddItemButton = ({ onAdd }: AddItemButtonProps) => {
 
 	const handleSubmit = () => {
 		if (!title.trim()) return;
-		onAdd(title, description, priority, status);
+		if (onAdd) {
+			onAdd(title, description, priority, status);
+		} else {
+			localStorage.setItem(
+				"bug_tracker_pending_task",
+				JSON.stringify({ title, description, priority, status }),
+			);
+			router.push("/board");
+		}
 		setTitle("");
 		setDescription("");
 		setPriority("Low");

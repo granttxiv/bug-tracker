@@ -1,4 +1,8 @@
+"use client";
+
+import Link from "next/link";
 import { ChevronDown, Circle, MoreHorizontal, Plus } from "lucide-react";
+import { useState } from "react";
 
 const backlogItems = [
 	{
@@ -38,6 +42,23 @@ const priorityColor: Record<string, string> = {
 };
 
 export default function Backlog() {
+	const [view, setView] = useState("Sprint backlog");
+	const [items, setItems] = useState(backlogItems);
+	const [showDetails, setShowDetails] = useState(false);
+
+	const addIssue = () => {
+		setItems((current) => [
+			...current,
+			{
+				id: `TASK-${200 + current.length}`,
+				title: "New backlog item",
+				type: "Task",
+				priority: "Medium",
+				owner: "AM",
+			},
+		]);
+	};
+
 	return (
 		<main className="min-h-screen bg-slate-100 p-5 text-slate-900 md:p-8">
 			<div className="mx-auto max-w-7xl space-y-6">
@@ -51,21 +72,38 @@ export default function Backlog() {
 							Prioritize upcoming work and keep the next sprint ready.
 						</p>
 					</div>
-					<button className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600">
+					<Link
+						href="/addItem"
+						className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600"
+					>
 						<Plus size={16} />
 						Create issue
-					</button>
+					</Link>
 				</header>
 
 				<section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 					<div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
 						<div className="flex items-center gap-2">
-							<button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-								Sprint backlog <ChevronDown size={15} />
+							<button
+								type="button"
+								onClick={() =>
+									setView((value) =>
+										value === "Sprint backlog"
+											? "Future backlog"
+											: "Sprint backlog",
+									)
+								}
+								className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+							>
+								{view} <ChevronDown size={15} />
 							</button>
-							<span className="text-sm text-slate-400">12 items</span>
+							<span className="text-sm text-slate-400">
+								{items.length} items
+							</span>
 						</div>
 						<button
+							type="button"
+							onClick={() => setShowDetails((value) => !value)}
 							className="text-slate-400 transition hover:text-slate-700"
 							aria-label="More backlog actions"
 						>
@@ -80,7 +118,7 @@ export default function Backlog() {
 						<span className="w-12 text-right">Owner</span>
 					</div>
 					<div className="divide-y divide-slate-100">
-						{backlogItems.map((item) => (
+						{items.map((item) => (
 							<div
 								key={item.id}
 								className="group flex items-center gap-3 px-5 py-4 transition hover:bg-blue-50/40"
@@ -108,10 +146,20 @@ export default function Backlog() {
 							</div>
 						))}
 					</div>
-					<button className="flex w-full items-center gap-2 border-t border-slate-100 px-5 py-3 text-sm font-medium text-slate-500 transition hover:bg-slate-50 hover:text-blue-700">
+					<button
+						type="button"
+						onClick={addIssue}
+						className="flex w-full items-center gap-2 border-t border-slate-100 px-5 py-3 text-sm font-medium text-slate-500 transition hover:bg-slate-50 hover:text-blue-700"
+					>
 						<Plus size={16} />
 						Add an issue
 					</button>
+					{showDetails && (
+						<p className="border-t border-slate-100 px-5 py-3 text-xs text-slate-500">
+							Backlog actions are ready for review. Use the view selector to
+							switch between sprint and future work.
+						</p>
+					)}
 				</section>
 			</div>
 		</main>
