@@ -20,7 +20,7 @@ const Register = () => {
 	const onSubmit = async (data: SignupProps) => {
 		reset();
 		data.name = fname + lname;
-		try {
+		try {	
 			const response = await axios.post("api/auth/register", { ...data });
 			console.log(response, "response");
 		} catch (error) {

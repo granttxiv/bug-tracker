@@ -20,7 +20,7 @@ const Login = () => {
 	} = useForm<LoginFormValues>();
 
 	const onSubmit = async (data: LoginFormValues) => {
-		console.log(data);
+		console.log(data);	
 		try {
 			const response = await axios.post("/api/auth/login", data);
 			console.log("Login response:", response);
