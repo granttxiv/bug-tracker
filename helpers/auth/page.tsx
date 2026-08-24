@@ -7,8 +7,8 @@ const AuthLogic = () => {
 
 	return (
 		<>
-			{pathname !== "/login" && (
-				<NavHeader className="bg-black w-full text-center" />
+			{pathname !== "/login" && pathname !== "/register" && (
+				<NavHeader className="w-full" />
 			)}
 		</>
 	);

@@ -34,9 +34,9 @@ const highlights = [
 
 export default function Home() {
 	return (
-		<main className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 px-5 py-8 md:px-8 md:py-12">
+		<main className="min-h-screen bg-linear-to-br from-slate-100 via-white to-slate-200 px-5 py-8 md:px-8 md:py-12">
 			<div className="mx-auto max-w-6xl">
-				<section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
+				<section className="overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-sm">
 					<div className="grid gap-8 p-6 md:p-10 lg:grid-cols-[1.2fr_0.8fr] lg:p-12">
 						<div className="flex flex-col justify-center">
 							<p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700">
@@ -88,12 +88,14 @@ export default function Home() {
 								</div>
 							</div>
 							<div className="rounded-2xl bg-blue-50 p-5 shadow-sm">
-								<p className="text-sm text-slate-500">Open issues</p>
-								<h2 className="mt-3 text-4xl font-bold text-blue-700">42</h2>
+								<p className="text-sm text-slate-500">Workspace view</p>
+								<h2 className="mt-3 text-3xl font-bold text-blue-700">Live</h2>
 							</div>
 							<div className="rounded-2xl bg-emerald-50 p-5 shadow-sm">
-								<p className="text-sm text-slate-500">Resolved</p>
-								<h2 className="mt-3 text-4xl font-bold text-emerald-600">94</h2>
+								<p className="text-sm text-slate-500">Ticket flow</p>
+								<h2 className="mt-3 text-3xl font-bold text-emerald-600">
+									Connected
+								</h2>
 							</div>
 						</div>
 					</div>
