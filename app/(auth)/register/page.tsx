@@ -37,7 +37,14 @@ const Register = () => {
 				password: data.password,
 				company: data.company,
 			});
-			if (response.status === 201) router.push("/dashboard");
+			if (response.status === 201) {
+				localStorage.setItem("bug_tracker_token", response.data.token);
+				localStorage.setItem(
+					"bug_tracker_user",
+					JSON.stringify(response.data.user),
+				);
+				router.push("/dashboard");
+			}
 		} catch (error) {
 			setSubmitError(
 				axios.isAxiosError(error)

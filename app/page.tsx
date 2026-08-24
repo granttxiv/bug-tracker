@@ -88,12 +88,14 @@ export default function Home() {
 								</div>
 							</div>
 							<div className="rounded-2xl bg-blue-50 p-5 shadow-sm">
-								<p className="text-sm text-slate-500">Open issues</p>
-								<h2 className="mt-3 text-4xl font-bold text-blue-700">42</h2>
+								<p className="text-sm text-slate-500">Workspace view</p>
+								<h2 className="mt-3 text-3xl font-bold text-blue-700">Live</h2>
 							</div>
 							<div className="rounded-2xl bg-emerald-50 p-5 shadow-sm">
-								<p className="text-sm text-slate-500">Resolved</p>
-								<h2 className="mt-3 text-4xl font-bold text-emerald-600">94</h2>
+								<p className="text-sm text-slate-500">Ticket flow</p>
+								<h2 className="mt-3 text-3xl font-bold text-emerald-600">
+									Connected
+								</h2>
 							</div>
 						</div>
 					</div>

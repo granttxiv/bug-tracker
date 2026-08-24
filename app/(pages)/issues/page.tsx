@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Filter, Plus, Search } from "lucide-react";
+import { ArrowUpRight, Filter, Search } from "lucide-react";
+import AddItemButton from "../../(components)/addItem/page";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 type Issue = {
 	id: string;
@@ -15,74 +18,38 @@ type Issue = {
 	description: string;
 };
 
-const issueData: Issue[] = [
-	{
-		id: "BUG-1042",
-		title: "Login redirect loop after successful sign in",
-		project: "Authentication",
-		priority: "High",
-		status: "In progress",
-		assignee: "Ava Patel",
-		updatedAt: "2 hours ago",
-		description:
-			"Users are being sent back to the login screen after successful authentication when a saved session is present.",
-	},
-	{
-		id: "BUG-1078",
-		title: "CSV export truncates rows above 10k records",
-		project: "Exports",
-		priority: "High",
-		status: "Review",
-		assignee: "Noah Chen",
-		updatedAt: "1 day ago",
-		description:
-			"Large exports are silently dropping records at the end of the CSV output when streaming from the backend.",
-	},
-	{
-		id: "BUG-1120",
-		title: "Board filters reset on page refresh",
-		project: "Board",
-		priority: "Medium",
-		status: "Open",
-		assignee: "Liam Johnson",
-		updatedAt: "3 hours ago",
-		description:
-			"Users lose the selected filter state when the board is refreshed, forcing them to reapply preferences.",
-	},
-	{
-		id: "BUG-1089",
-		title: "Profile avatar upload appears blurred",
-		project: "Profile",
-		priority: "Low",
-		status: "Closed",
-		assignee: "Emma Lopez",
-		updatedAt: "4 days ago",
-		description:
-			"Upload previews render softly blurred for images captured on mobile devices and uploaded at high resolution.",
-	},
-	{
-		id: "BUG-1096",
-		title: "Settings save button stays disabled after validation",
-		project: "Settings",
-		priority: "Medium",
-		status: "Open",
-		assignee: "Sophia Nguyen",
-		updatedAt: "30 minutes ago",
-		description:
-			"After a user corrects a form error, the save button remains disabled until the form is blurred or interacted with again.",
-	},
-	{
-		id: "BUG-1104",
-		title: "Backlog ordering changes between sessions",
-		project: "Backlog",
-		priority: "Low",
-		status: "Review",
-		assignee: "Ethan Ross",
-		updatedAt: "5 hours ago",
-		description:
-			"Stored priority order is not retained when the backlog is reopened in a different browser tab or session.",
-	},
-];
+type ApiTicket = {
+	id: string;
+	title: string;
+	description: string;
+	type: string;
+	priority: string;
+	status: string;
+	assignedUser?: { name?: string } | null;
+	updatedAt: string;
+};
+
+const normalizeTicket = (ticket: ApiTicket): Issue => ({
+	id: ticket.id,
+	title: ticket.title,
+	project: ticket.type.replaceAll("_", " "),
+	priority:
+		ticket.priority === "critical"
+			? "High"
+			: ((ticket.priority.charAt(0).toUpperCase() +
+					ticket.priority.slice(1)) as Issue["priority"]),
+	status:
+		ticket.status === "in_progress"
+			? "In progress"
+			: ticket.status === "new"
+				? "Open"
+				: ticket.status === "resolved" || ticket.status === "closed"
+					? "Closed"
+					: "Review",
+	assignee: ticket.assignedUser?.name ?? "Unassigned",
+	updatedAt: new Date(ticket.updatedAt).toLocaleString(),
+	description: ticket.description,
+});
 
 const filters = ["All", "Open", "In progress", "Review", "Closed"] as const;
 
@@ -109,6 +76,37 @@ const IssuesPage = () => {
 	);
 	const [showFilters, setShowFilters] = useState(true);
 	const [actionMessage, setActionMessage] = useState("");
+	const [issues, setIssues] = useState<Issue[]>([]);
+	const [isLoading, setIsLoading] = useState(
+		() =>
+			typeof window !== "undefined" &&
+			Boolean(localStorage.getItem("bug_tracker_token")),
+	);
+	const [apiError, setApiError] = useState(() =>
+		typeof window !== "undefined" && !localStorage.getItem("bug_tracker_token")
+			? "Please sign in to view your issues."
+			: "",
+	);
+
+	useEffect(() => {
+		const token = localStorage.getItem("bug_tracker_token");
+		if (!token) return;
+		fetch("/api/tickets?limit=100", {
+			headers: { Authorization: `Bearer ${token}` },
+		})
+			.then(async (response) => {
+				const payload = await response.json();
+				if (!response.ok)
+					throw new Error(payload.error ?? "Unable to load issues");
+				setIssues((payload.tickets as ApiTicket[]).map(normalizeTicket));
+			})
+			.catch((error) =>
+				setApiError(
+					error instanceof Error ? error.message : "Unable to load issues",
+				),
+			)
+			.finally(() => setIsLoading(false));
+	}, []);
 
 	const exportIssues = () => {
 		const csv = [
@@ -136,7 +134,7 @@ const IssuesPage = () => {
 		);
 	};
 
-	const filteredIssues = issueData.filter((issue) => {
+	const filteredIssues = issues.filter((issue) => {
 		const matchesFilter =
 			activeFilter === "All" ? true : issue.status === activeFilter;
 		const matchesSearch = `${issue.title} ${issue.project} ${issue.assignee}`
@@ -168,22 +166,56 @@ const IssuesPage = () => {
 							<Filter size={16} />
 							Filter
 						</button>
-						<Link
-							href="/addItem"
-							className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600"
-						>
-							<Plus size={16} />
-							New issue
-						</Link>
+						<AddItemButton
+							mode="issue"
+							onAdd={async (title, description, priority) => {
+								const token = localStorage.getItem("bug_tracker_token");
+								const response = await axios.post(
+									"/api/tickets",
+									{
+										title,
+										description,
+										type: "bug",
+										priority: priority.toLowerCase(),
+									},
+									{ headers: { Authorization: `Bearer ${token}` } },
+								);
+								setIssues((current) => [
+									normalizeTicket(response.data),
+									...current,
+								]);
+								setActionMessage("Issue created successfully.");
+							}}
+						/>
 					</div>
 				</header>
+				{isLoading && (
+					<div className="rounded-xl border border-slate-200 bg-white p-5">
+						<LoadingSpinner label="Loading issues" />
+					</div>
+				)}
+				{apiError && (
+					<p className="rounded-xl border border-red-100 bg-red-50 p-5 text-sm text-red-700">
+						{apiError}
+					</p>
+				)}
 
 				<section className="grid gap-4 md:grid-cols-4">
 					{[
-						{ label: "Total issues", value: "128", change: "+12%" },
-						{ label: "Open", value: "42", change: "+4" },
-						{ label: "In review", value: "18", change: "+3" },
-						{ label: "Resolved", value: "94", change: "+23%" },
+						{ label: "Total issues", value: issues.length },
+						{
+							label: "Open",
+							value: issues.filter((issue) => issue.status === "Open").length,
+						},
+						{
+							label: "In progress",
+							value: issues.filter((issue) => issue.status === "In progress")
+								.length,
+						},
+						{
+							label: "Resolved",
+							value: issues.filter((issue) => issue.status === "Closed").length,
+						},
 					].map((stat) => (
 						<div
 							key={stat.label}
@@ -192,9 +224,6 @@ const IssuesPage = () => {
 							<p className="text-sm text-slate-500">{stat.label}</p>
 							<div className="mt-4 flex items-end justify-between gap-4">
 								<h2 className="text-3xl font-bold">{stat.value}</h2>
-								<span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">
-									{stat.change}
-								</span>
 							</div>
 						</div>
 					))}
@@ -262,7 +291,12 @@ const IssuesPage = () => {
 													</div>
 													<div>
 														<p className="font-semibold text-slate-800">
-															{issue.title}
+															<Link
+																href={`/issues/${issue.id}`}
+																className="font-semibold text-slate-800 hover:text-blue-700"
+															>
+																{issue.title}
+															</Link>
 														</p>
 														<p className="mt-1 text-xs text-slate-500">
 															{issue.id}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, Plus, Search, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const navigation = [
 	{ href: "/dashboard", label: "Overview" },
@@ -12,11 +12,36 @@ const navigation = [
 	{ href: "/backlog", label: "Backlog" },
 ];
 
+const getInitials = (name?: string) => {
+	const parts = name?.trim().split(/\s+/).filter(Boolean) ?? [];
+	if (parts.length === 0) return "?";
+	if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+	return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+};
+
 const NavHeader = ({ className = "" }: { className?: string }) => {
 	const pathname = usePathname();
 	const router = useRouter();
 	const [isOpen, setIsOpen] = useState(false);
 	const [search, setSearch] = useState("");
+	const [profileInitials, setProfileInitials] = useState("?");
+
+	useEffect(() => {
+		const readProfile = () => {
+			try {
+				const storedUser = localStorage.getItem("bug_tracker_user");
+				const user = storedUser
+					? (JSON.parse(storedUser) as { name?: string })
+					: null;
+				setProfileInitials(getInitials(user?.name));
+			} catch {
+				setProfileInitials("?");
+			}
+		};
+		readProfile();
+		window.addEventListener("storage", readProfile);
+		return () => window.removeEventListener("storage", readProfile);
+	}, []);
 
 	const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -89,7 +114,7 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 						aria-label="Open settings"
 						className={`flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700 ring-2 ring-white transition hover:bg-slate-200 ${pathname === "/settings" ? "ring-blue-200" : ""}`}
 					>
-						AM
+						{profileInitials}
 					</Link>
 					<button
 						type="button"

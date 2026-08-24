@@ -27,6 +27,11 @@ const Login = () => {
 		try {
 			const response = await axios.post("/api/auth/login", data);
 			if (response.status === 200) {
+				localStorage.setItem("bug_tracker_token", response.data.token);
+				localStorage.setItem(
+					"bug_tracker_user",
+					JSON.stringify(response.data.user),
+				);
 				router.push("/dashboard");
 			}
 		} catch (error) {
@@ -168,19 +173,19 @@ const Login = () => {
 					</div>
 					<div className="relative grid grid-cols-2 gap-3">
 						<div className="rounded-2xl bg-white/10 p-5 backdrop-blur-sm">
-							<p className="text-sm text-slate-300">Open issues</p>
-							<p className="mt-2 text-3xl font-bold">42</p>
+							<p className="text-sm text-slate-300">Issue tracking</p>
+							<p className="mt-2 text-3xl font-bold">Focused</p>
 						</div>
 						<div className="rounded-2xl bg-emerald-400/15 p-5">
-							<p className="text-sm text-emerald-200">Resolved</p>
-							<p className="mt-2 text-3xl font-bold text-emerald-300">94</p>
+							<p className="text-sm text-emerald-200">Team workflow</p>
+							<p className="mt-2 text-3xl font-bold text-emerald-300">Clear</p>
 						</div>
 						<div className="col-span-2 flex items-center justify-between rounded-2xl bg-blue-500 p-5">
 							<div>
 								<p className="text-sm text-blue-100">Sprint health</p>
 								<p className="mt-1 text-2xl font-bold">On track</p>
 							</div>
-							<span className="text-3xl font-black">+18.2%</span>
+							<span className="text-3xl font-black">Live</span>
 						</div>
 					</div>
 				</div>

@@ -11,6 +11,7 @@ import {
 	Sparkles,
 	UserCircle2,
 } from "lucide-react";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 type ToggleKey = "productUpdates" | "securityAlerts" | "weeklyDigest";
 
@@ -28,13 +29,13 @@ type FormState = {
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
 const initialForm: FormState = {
-	displayName: "Ava Patel",
-	email: "ava@bugtracker.io",
-	timezone: "UTC-05:00",
-	language: "English (US)",
-	officeHours: "9:00 AM - 5:00 PM",
-	productUpdates: true,
-	securityAlerts: true,
+	displayName: "",
+	email: "",
+	timezone: "",
+	language: "",
+	officeHours: "",
+	productUpdates: false,
+	securityAlerts: false,
 	weeklyDigest: false,
 };
 
@@ -60,14 +61,6 @@ const validateForm = (values: FormState): FormErrors => {
 		errors.email = "Email is required.";
 	} else if (!emailPattern.test(values.email)) {
 		errors.email = "Enter a valid email address.";
-	}
-
-	if (!values.timezone.trim()) {
-		errors.timezone = "Timezone is required.";
-	}
-
-	if (!values.language.trim()) {
-		errors.language = "Language is required.";
 	}
 
 	return errors;
@@ -262,8 +255,14 @@ export default function SettingsPage() {
 								<h2 className="mt-1 text-2xl font-semibold">{activeTab}</h2>
 							</div>
 							<div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-								<Check size={14} />
-								{lastSaved}
+								{isLoading ? (
+									<LoadingSpinner label="Loading profile" centered={false} />
+								) : (
+									<>
+										<Check size={14} />
+										{lastSaved}
+									</>
+								)}
 							</div>
 						</div>
 
@@ -435,7 +434,7 @@ export default function SettingsPage() {
 									</label>
 									<input
 										type="password"
-										defaultValue="••••••••"
+										placeholder="Enter your current password"
 										className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white"
 									/>
 								</div>
