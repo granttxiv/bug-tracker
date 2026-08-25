@@ -14,22 +14,6 @@
 npm install
 ```
 
-### 2. Environment Setup
-
-Create `.env.local` in the project root:
-
-```bash
-# Database
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/track_me_dev
-
-# JWT & Auth
-JWT_SECRET=your-super-secret-key-min-32-chars-change-in-prod
-JWT_EXPIRATION=24h
-
-# Node environment
-NODE_ENV=development
-```
-
 ### 3. Database Setup
 
 ```bash
