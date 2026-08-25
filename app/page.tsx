@@ -36,10 +36,12 @@ const highlights = [
 
 export default function Home() {
 	const [user, setUser] = useState("");
+
 	useEffect(() => {
-		const user = localStorage.getItem("bug_tracker_token") as string;
-		setUser(user);
-	});
+		const storedUser = localStorage.getItem("bug_tracker_user") as string;
+		setUser(storedUser);
+	}, []);
+
 	return (
 		<main className="min-h-screen bg-linear-to-br from-slate-100 via-white to-slate-200 px-5 py-8 md:px-8 md:py-12">
 			<div className="mx-auto max-w-6xl">

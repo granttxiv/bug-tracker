@@ -32,11 +32,12 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 			try {
 				const storedUser = localStorage.getItem("bug_tracker_user") as string;
 				setUser(storedUser);
-				const user = storedUser
+				const parsedUser = storedUser
 					? (JSON.parse(storedUser) as { name?: string })
 					: null;
-				setProfileInitials(getInitials(user?.name));
+				setProfileInitials(getInitials(parsedUser?.name));
 			} catch {
+				setUser("");
 				setProfileInitials("?");
 			}
 		};
@@ -104,20 +105,24 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 				</div>
 
 				<div className="ml-auto flex items-center gap-2">
-					<Link
-						href="/issues"
-						className="hidden items-center gap-1.5 rounded-lg bg-blue-800 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 sm:inline-flex"
-					>
-						<Plus size={16} />
-						Create
-					</Link>
-					<Link
-						href="/settings"
-						aria-label="Open settings"
-						className={`flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700 ring-2 ring-white transition hover:bg-slate-200 ${pathname === "/settings" ? "ring-blue-200" : ""}`}
-					>
-						{profileInitials}
-					</Link>
+					{user ? (
+						<>
+							<Link
+								href="/issues"
+								className="hidden items-center gap-1.5 rounded-lg bg-blue-800 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 sm:inline-flex"
+							>
+								<Plus size={16} />
+								Create
+							</Link>
+							<Link
+								href="/settings"
+								aria-label="Open settings"
+								className={`flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700 ring-2 ring-white transition hover:bg-slate-200 ${pathname === "/settings" ? "ring-blue-200" : ""}`}
+							>
+								{profileInitials}
+							</Link>
+						</>
+					) : null}
 					<button
 						type="button"
 						onClick={() => setIsOpen((value) => !value)}
@@ -166,4 +171,4 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 	);
 };
 
-export default NavHeader;
+export default NavHeader;	
