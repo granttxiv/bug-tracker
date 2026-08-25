@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { apiClient } from "@/app/api/requestProcessor";
+
 
 type SignupFormValues = {
 	firstName: string;
@@ -31,7 +33,7 @@ const Register = () => {
 	const onSubmit = async (data: SignupFormValues) => {
 		setSubmitError("");
 		try {
-			const response = await axios.post("/api/auth/register", {
+			const response = await apiClient.post("/api/auth/register", {
 				name: `${data.firstName} ${data.lastName}`.trim(),
 				email: data.email,
 				password: data.password,

@@ -9,6 +9,7 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 type AddItemButtonProps = {
@@ -18,8 +19,11 @@ type AddItemButtonProps = {
 		description: string,
 		priority: string,
 		status: string,
+		assignedTo?: string,
 	) => void | Promise<void>;
 };
+
+type TeamMember = { id: string; name: string; email: string; role: string };
 
 const AddItemButton = ({ mode = "task", onAdd }: AddItemButtonProps) => {
 	const router = useRouter();
@@ -30,6 +34,29 @@ const AddItemButton = ({ mode = "task", onAdd }: AddItemButtonProps) => {
 	const [error, setError] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [open, setOpen] = useState(false);
+	const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+	const [assigneeQuery, setAssigneeQuery] = useState("");
+	const [teamError, setTeamError] = useState("");
+
+	useEffect(() => {
+		if (!open) return;
+		const token = localStorage.getItem("bug_tracker_token");
+		if (!token) return;
+		fetch("/api/team/users", { headers: { Authorization: `Bearer ${token}` } })
+			.then(async (response) => {
+				const payload = await response.json();
+				if (!response.ok)
+					throw new Error(payload.error ?? "Unable to load team members");
+				setTeamMembers(payload);
+			})
+			.catch((requestError) =>
+				setTeamError(
+					requestError instanceof Error
+						? requestError.message
+						: "Unable to load team members",
+				),
+			);
+	}, [open]);
 
 	const handleSubmit = async () => {
 		if (!title.trim()) {
@@ -43,8 +70,14 @@ const AddItemButton = ({ mode = "task", onAdd }: AddItemButtonProps) => {
 		setError("");
 		setIsSubmitting(true);
 		try {
+			const assignee = teamMembers.find(
+				(member) =>
+					`${member.name} - ${member.email}` === assigneeQuery ||
+					member.name === assigneeQuery ||
+					member.email === assigneeQuery,
+			);
 			if (onAdd) {
-				await onAdd(title, description, priority, status);
+				await onAdd(title, description, priority, status, assignee?.id);
 			} else if (mode === "issue") {
 				localStorage.setItem(
 					"bug_tracker_pending_issue",
@@ -54,7 +87,13 @@ const AddItemButton = ({ mode = "task", onAdd }: AddItemButtonProps) => {
 			} else {
 				localStorage.setItem(
 					"bug_tracker_pending_task",
-					JSON.stringify({ title, description, priority, status }),
+					JSON.stringify({
+						title,
+						description,
+						priority,
+						status,
+						assignedTo: assignee?.id,
+					}),
 				);
 				router.push("/board");
 			}
@@ -62,6 +101,7 @@ const AddItemButton = ({ mode = "task", onAdd }: AddItemButtonProps) => {
 			setDescription("");
 			setPriority("Low");
 			setStatus("pending");
+			setAssigneeQuery("");
 			setOpen(false);
 		} finally {
 			setIsSubmitting(false);
@@ -95,6 +135,27 @@ const AddItemButton = ({ mode = "task", onAdd }: AddItemButtonProps) => {
 						value={title}
 						onChange={(e) => setTitle(e.target.value)}
 					/>
+				</label>
+				<label className="flex flex-col gap-1">
+					<span className="text-xs font-medium">Assign to team member</span>
+					<input
+						list="team-members"
+						value={assigneeQuery}
+						onChange={(event) => setAssigneeQuery(event.target.value)}
+						placeholder="Search by name or email"
+						className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 outline-none transition focus:border-blue-500 focus:bg-white"
+					/>
+					<datalist id="team-members">
+						{teamMembers.map((member) => (
+							<option
+								key={member.id}
+								value={`${member.name} - ${member.email}`}
+							/>
+						))}
+					</datalist>
+					{teamError && (
+						<span className="text-xs text-red-600">{teamError}</span>
+					)}
 				</label>
 				<label className="flex flex-col gap-1">
 					<span className="text-xs font-medium">Description</span>

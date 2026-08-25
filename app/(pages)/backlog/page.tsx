@@ -64,6 +64,8 @@ export default function Backlog() {
 		title: string,
 		description: string,
 		priority: string,
+		_status: string,
+		assignedTo?: string,
 	) => {
 		if (!token) return;
 		const response = await fetch("/api/tickets", {
@@ -77,6 +79,7 @@ export default function Backlog() {
 				description,
 				type: "bug",
 				priority: priority.toLowerCase(),
+				assignedTo,
 			}),
 		});
 		const payload = await response.json();

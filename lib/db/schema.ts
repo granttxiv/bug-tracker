@@ -9,6 +9,7 @@ import {
   boolean,
   jsonb,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const userRoleEnum = pgEnum("user_role", ["admin", "agent", "client"]);
@@ -96,6 +97,23 @@ export const tickets = pgTable(
   ],
 );
 
+export const ticketMembers = pgTable(
+  "ticket_members",
+  {
+    ticketId: uuid("ticket_id")
+      .references(() => tickets.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("ticket_members_ticket_user_unique").on(table.ticketId, table.userId),
+    index("idx_ticket_members_user_id").on(table.userId),
+  ],
+);
+
 // Ticket comments table
 export const ticketComments = pgTable(
   "ticket_comments",
@@ -126,7 +144,9 @@ export const ticketActivities = pgTable(
     ticketId: uuid("ticket_id")
       .references(() => tickets.id, { onDelete: "cascade" })
       .notNull(),
-    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+    userId: uuid("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     action: ticketActivityActionEnum("action").notNull(),
     oldValue: jsonb("old_value"),
     newValue: jsonb("new_value"),

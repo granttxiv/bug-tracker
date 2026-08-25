@@ -12,6 +12,7 @@ import {
 	UserCircle2,
 } from "lucide-react";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import { apiClient } from "@/app/api/requestProcessor";
 
 type ToggleKey = "productUpdates" | "securityAlerts" | "weeklyDigest";
 
@@ -44,6 +45,7 @@ const tabs = [
 	{ label: "Notifications", icon: Bell },
 	{ label: "Security", icon: ShieldCheck },
 	{ label: "Appearance", icon: Sparkles },
+	{ label: "Logout", icon: Lock },
 ];
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -73,7 +75,16 @@ export default function SettingsPage() {
 	const [lastSaved, setLastSaved] = useState("Loading profile...");
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
-	const [accentColor, setAccentColor] = useState("bg-blue-600");
+	const [accentColor, setAccentColor] = useState(() =>
+		typeof window !== "undefined"
+			? (localStorage.getItem("bug_tracker_accent") ?? "bg-blue-800")
+			: "bg-blue-600",
+	);
+
+	useEffect(() => {
+		document.documentElement.dataset.accent = accentColor;
+		localStorage.setItem("bug_tracker_accent", accentColor);
+	}, [accentColor]);
 
 	useEffect(() => {
 		const token =
@@ -190,6 +201,32 @@ export default function SettingsPage() {
 		}
 	};
 
+	const handleLogout = async () => {
+		const token = localStorage.getItem("bug_tracker_token");
+
+		try {
+			const response = await apiClient.post(
+				"/api/auth/logout",
+				{},
+				{
+					withCredentials: true,
+					headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+				},
+			);
+
+			if (response.status === 200) {
+				localStorage.removeItem("bug_tracker_token");
+				localStorage.removeItem("bug_tracker_user");
+				router.push("/login");
+			}
+		} catch {
+			// Even if the request fails, clear local state so the UI doesn't
+			// show a "logged in" state that no longer matches the server.
+			localStorage.removeItem("bug_tracker_token");
+			localStorage.removeItem("bug_tracker_user");
+			router.push("/login");
+		}
+	};
 	return (
 		<main className="min-h-screen bg-slate-100 p-5 text-slate-900 md:p-8">
 			<div className="mx-auto max-w-6xl space-y-6">
@@ -504,6 +541,22 @@ export default function SettingsPage() {
 										))}
 									</div>
 								</div>
+							</div>
+						)}
+
+						{activeTab === "Logout" && (
+							<div className="mt-6">
+								<p className="text-sm text-slate-600">
+									You will be logged out of all devices and will need to sign in
+									again.
+								</p>
+								<button
+									type="button"
+									onClick={handleLogout}
+									className="mt-4 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+								>
+									Log out
+								</button>
 							</div>
 						)}
 					</form>

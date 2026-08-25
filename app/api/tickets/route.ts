@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { withAuth, AuthenticatedRequest } from "@/lib/auth/middleware";
 import { CreateTicketSchema, ListTicketsSchema } from "@/lib/types/ticket";
-import { createTicket, listClientTickets, logActivity } from "@/lib/db/tickets";
 import { evaluateAutomationRules, applySLAPolicy } from "@/lib/services/automationEngine";
 import { searchArticles } from "@/lib/db/kb";
 import { createNotification } from "@/lib/db/notifications";
 import { sendEmail, getTicketCreatedEmail } from "@/lib/services/emailService";
+import { addTicketMembers, createTicket, listClientTickets } from "@/lib/db/tickets";
+import { db } from "@/lib/db/client";
+import { users } from "@/lib/db/schema";
+import { eq, inArray } from "drizzle-orm";
 
 export const POST = withAuth(async (req: AuthenticatedRequest) => {
   try {
@@ -15,7 +18,10 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
     const validation = CreateTicketSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
-        { error: "Invalid input", details: validation.error.issues.map((i) => i.message) },
+        {
+          error: "Invalid input",
+          details: validation.error.issues.map((i) => i.message),
+        },
         { status: 400 },
       );
     }
@@ -25,6 +31,28 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
     // Only clients can create tickets (or admins on their behalf)
     if (req.user?.role !== "client" && req.user?.role !== "admin") {
       return NextResponse.json({ error: "Only clients can create tickets" }, { status: 403 });
+    }
+
+    const memberIds = [
+      ...new Set([...(data.memberIds ?? []), ...(data.assignedTo ? [data.assignedTo] : [])]),
+    ];
+    if (memberIds.length > 0) {
+      const assignee = await db
+        .select({ id: users.id, company: users.company, role: users.role })
+        .from(users)
+        .where(inArray(users.id, memberIds));
+      const owner = await db
+        .select({ company: users.company })
+        .from(users)
+        .where(eq(users.id, req.user!.userId))
+        .limit(1);
+      if (
+        assignee.length !== memberIds.length ||
+        (req.user?.role !== "admin" &&
+          assignee.some((member) => member.company !== owner[0]?.company))
+      ) {
+        return NextResponse.json({ error: "Invalid team assignee" }, { status: 400 });
+      }
     }
 
     // Create the ticket
@@ -40,20 +68,9 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
       stepsToReproduce: data.stepsToReproduce,
       expectedBehavior: data.expectedBehavior,
       actualBehavior: data.actualBehavior,
+      assignedTo: data.assignedTo,
     });
-
-    // Log the activity
-    await logActivity({
-      ticketId: ticket.id,
-      userId: req.user!.userId,
-      action: "created",
-      oldValue: null,
-      newValue: {
-        title: ticket.title,
-        status: ticket.status,
-        priority: ticket.priority,
-      },
-    });
+    await addTicketMembers(ticket.id, memberIds);
 
     // Evaluate automation rules (Phase 3)
     await evaluateAutomationRules(ticket);
@@ -81,6 +98,17 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
     );
     await sendEmail({ to: req.user!.email || "", ...emailTemplate });
 
+    await logActivity({
+      ticketId: ticket.id,
+      userId: req.user!.userId,
+      action: "created",
+      oldValue: null,
+      newValue: {
+        title: ticket.title,
+        status: ticket.status,
+        priority: ticket.priority,
+      },
+    });
     return NextResponse.json({ ...ticket, kbSuggestions: suggestions }, { status: 201 });
   } catch (error) {
     console.error("Error creating ticket:", error);
