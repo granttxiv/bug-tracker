@@ -5,7 +5,7 @@ import { evaluateAutomationRules, applySLAPolicy } from "@/lib/services/automati
 import { searchArticles } from "@/lib/db/kb";
 import { createNotification } from "@/lib/db/notifications";
 import { sendEmail, getTicketCreatedEmail } from "@/lib/services/emailService";
-import { addTicketMembers, createTicket, listClientTickets } from "@/lib/db/tickets";
+import { addTicketMembers, createTicket, listClientTickets, logActivity } from "@/lib/db/tickets";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
 import { eq, inArray } from "drizzle-orm";
