@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 import { withAuth, AuthenticatedRequest } from "@/lib/auth/middleware";
+import { db } from "@/lib/db/client";
+import { tickets } from "@/lib/db/schema";
 import { UpdateTicketSchema } from "@/lib/types/ticket";
 import { getTicketWithDetails, updateTicket, getTicket, logActivity } from "@/lib/db/tickets";
 
@@ -63,10 +66,18 @@ export const PATCH = withAuth<"/api/tickets/[id]">(async (req: AuthenticatedRequ
     }
 
     const updates = validation.data;
-    const oldValues: Record<string, any> = {};
-    const newValues: Record<string, any> = {};
+    const oldValues: Record<string, unknown> = {};
+    const newValues: Record<string, unknown> = {};
 
     // Track what changed
+    if (updates.title && ticket.title !== updates.title) {
+      oldValues.title = ticket.title;
+      newValues.title = updates.title;
+    }
+    if (updates.priority && ticket.priority !== updates.priority) {
+      oldValues.priority = ticket.priority;
+      newValues.priority = updates.priority;
+    }
     if (updates.description && ticket.description !== updates.description) {
       oldValues.description = ticket.description;
       newValues.description = updates.description;
@@ -82,6 +93,10 @@ export const PATCH = withAuth<"/api/tickets/[id]">(async (req: AuthenticatedRequ
     if (updates.actualBehavior && ticket.actualBehavior !== updates.actualBehavior) {
       oldValues.actualBehavior = ticket.actualBehavior;
       newValues.actualBehavior = updates.actualBehavior;
+    }
+    if (updates.status && ticket.status !== updates.status) {
+      oldValues.status = ticket.status;
+      newValues.status = updates.status;
     }
 
     // Update the ticket
@@ -107,5 +122,22 @@ export const PATCH = withAuth<"/api/tickets/[id]">(async (req: AuthenticatedRequ
   } catch (error) {
     console.error("Error updating ticket:", error);
     return NextResponse.json({ error: "Failed to update ticket" }, { status: 500 });
+  }
+});
+
+export const DELETE = withAuth(async (req: AuthenticatedRequest) => {
+  try {
+    const id = req.nextUrl.pathname.split("/").pop();
+    if (!id) return NextResponse.json({ error: "Ticket ID is required" }, { status: 400 });
+    const ticket = await getTicket(id);
+    if (!ticket) return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
+    if (req.user?.role !== "admin" && ticket.clientId !== req.user?.userId) {
+      return NextResponse.json({ error: "You don't have access to this ticket" }, { status: 403 });
+    }
+    const deleted = await db.delete(tickets).where(eq(tickets.id, id)).returning();
+    return NextResponse.json({ ticket: deleted[0] });
+  } catch (error) {
+    console.error("Error deleting ticket:", error);
+    return NextResponse.json({ error: "Failed to delete ticket" }, { status: 500 });
   }
 });

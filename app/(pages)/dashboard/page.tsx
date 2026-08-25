@@ -1,84 +1,122 @@
-const stats = [
-	{ label: "Total issues", value: "128", change: "+12%", tone: "blue" },
-	{ label: "In progress", value: "18", change: "+4", tone: "amber" },
-	{ label: "Resolved", value: "94", change: "+23%", tone: "green" },
-	{ label: "Avg. fix time", value: "3.4d", change: "-18%", tone: "purple" },
-];
+"use client";
 
-const sprintData = [
-	{ day: "Mon", value: 42 },
-	{ day: "Tue", value: 58 },
-	{ day: "Wed", value: 66 },
-	{ day: "Thu", value: 48 },
-	{ day: "Fri", value: 76 },
-	{ day: "Sat", value: 62 },
-	{ day: "Sun", value: 88 },
-];
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
-const issues = [
-	{
-		title: "Login redirect loop",
-		priority: "High",
-		status: "In progress",
-		owner: "Ava",
-	},
-	{
-		title: "CSV export fails on large datasets",
-		priority: "High",
-		status: "Review",
-		owner: "Noah",
-	},
-	{
-		title: "Board filters persist incorrectly",
-		priority: "Medium",
-		status: "Queued",
-		owner: "Liam",
-	},
-	{
-		title: "Profile avatar upload is blurry",
-		priority: "Low",
-		status: "Resolved",
-		owner: "Emma",
-	},
-];
-
-const activity = [
-	{
-		name: "Ava Patel",
-		task: "Fixed auth redirect edge case",
-		time: "18 min ago",
-	},
-	{
-		name: "Noah Chen",
-		task: "Reviewed backlog cleanup request",
-		time: "31 min ago",
-	},
-	{
-		name: "Emma Lopez",
-		task: "Updated onboarding analytics",
-		time: "1 hr ago",
-	},
-	{
-		name: "Liam Johnson",
-		task: "Closed duplicate bug report",
-		time: "2 hrs ago",
-	},
-];
-
-const toneClasses: Record<string, string> = {
-	blue: "bg-blue-100 text-blue-700",
-	amber: "bg-amber-100 text-amber-700",
-	green: "bg-emerald-100 text-emerald-700",
-	purple: "bg-violet-100 text-violet-700",
+type Ticket = {
+	id: string;
+	title: string;
+	priority: string;
+	status: string;
+	assignedUser?: { name?: string } | null;
+	createdAt: string;
+	updatedAt: string;
 };
 
+const statusLabel = (status: string) =>
+	status === "in_progress"
+		? "In progress"
+		: status.charAt(0).toUpperCase() + status.slice(1);
 const priorityClasses: Record<string, string> = {
-	High: "bg-red-100 text-red-700",
-	Medium: "bg-yellow-100 text-yellow-700",
-	Low: "bg-emerald-100 text-emerald-700",
+	critical: "bg-red-100 text-red-700",
+	high: "bg-red-100 text-red-700",
+	medium: "bg-amber-100 text-amber-700",
+	low: "bg-emerald-100 text-emerald-700",
 };
 
-const Dashboard = () => {
+export default function Dashboard() {
+	const token =
+		typeof window !== "undefined"
+			? localStorage.getItem("bug_tracker_token")
+			: null;
+	const [tickets, setTickets] = useState<Ticket[]>([]);
+	const [isLoading, setIsLoading] = useState(Boolean(token));
+	const [error, setError] = useState(
+		token ? "" : "Please sign in to view your dashboard.",
+	);
+
+	useEffect(() => {
+		if (!token) return;
+		fetch("/api/tickets?limit=100", {
+			headers: { Authorization: `Bearer ${token}` },
+		})
+			.then(async (response) => {
+				const payload = await response.json();
+				if (!response.ok)
+					throw new Error(payload.error ?? "Unable to load dashboard");
+				setTickets(payload.tickets ?? []);
+			})
+			.catch((requestError) =>
+				setError(
+					requestError instanceof Error
+						? requestError.message
+						: "Unable to load dashboard",
+				),
+			)
+			.finally(() => setIsLoading(false));
+	}, [token]);
+
+	const counts = {
+		total: tickets.length,
+		open: tickets.filter(
+			(ticket) => !["resolved", "closed"].includes(ticket.status),
+		).length,
+		inProgress: tickets.filter((ticket) => ticket.status === "in_progress")
+			.length,
+		resolved: tickets.filter((ticket) =>
+			["resolved", "closed"].includes(ticket.status),
+		).length,
+	};
+	const recentTickets = [...tickets]
+		.sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
+		.slice(0, 5);
+	const days = Array.from({ length: 7 }, (_, index) => {
+		const date = new Date();
+		date.setDate(date.getDate() - (6 - index));
+		return date;
+	});
+	const activityByDay = days.map(
+		(day) =>
+			tickets.filter(
+				(ticket) =>
+					new Date(ticket.updatedAt).toDateString() === day.toDateString(),
+			).length,
+	);
+	const maxActivity = Math.max(...activityByDay, 1);
+
+	const downloadReport = () => {
+		const csv = [
+			"Metric,Value",
+			`Total issues,${counts.total}`,
+			`Open,${counts.open}`,
+			`In progress,${counts.inProgress}`,
+			`Resolved,${counts.resolved}`,
+		].join("\n");
+		const link = document.createElement("a");
+		link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+		link.download = "bug-tracker-dashboard.csv";
+		link.click();
+		URL.revokeObjectURL(link.href);
+	};
+
+	if (isLoading)
+		return (
+			<main className="min-h-screen bg-slate-100 p-8 text-slate-900">
+				<div className="mx-auto max-w-7xl">
+					<LoadingSpinner label="Loading dashboard" />
+				</div>
+			</main>
+		);
+	if (error)
+		return (
+			<main className="min-h-screen bg-slate-100 p-5 text-slate-900 md:p-8">
+				<p className="mx-auto max-w-7xl rounded-xl border border-red-100 bg-red-50 p-5 text-sm text-red-700">
+					{error}
+				</p>
+			</main>
+		);
+
 	return (
 		<main className="min-h-screen bg-slate-100 p-6 text-slate-900">
 			<div className="mx-auto max-w-7xl space-y-6">
@@ -88,125 +126,113 @@ const Dashboard = () => {
 							Product dashboard
 						</p>
 						<h1 className="mt-2 text-3xl font-bold tracking-tight">
-							Good morning, Alex
+							Workspace overview
 						</h1>
+						<p className="mt-2 text-sm text-slate-500">
+							Live ticket activity from your workspace.
+						</p>
 					</div>
-					<div className="flex items-center gap-3">
-						<button className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-							This week
-						</button>
-						<button className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600">
-							+ New report
-						</button>
-					</div>
+					<button
+						type="button"
+						onClick={downloadReport}
+						className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600"
+					>
+						Download report
+					</button>
 				</header>
-
 				<section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-					{stats.map((stat) => (
+					{[
+						{ label: "Total issues", value: counts.total },
+						{ label: "Open", value: counts.open },
+						{ label: "In progress", value: counts.inProgress },
+						{ label: "Resolved", value: counts.resolved },
+					].map((stat) => (
 						<div
 							key={stat.label}
 							className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
 						>
-							<div className="flex items-start justify-between gap-4">
-								<div>
-									<p className="text-sm text-slate-500">{stat.label}</p>
-									<h2 className="mt-3 text-3xl font-bold">{stat.value}</h2>
-								</div>
-								<span
-									className={`rounded-full px-2.5 py-1 text-xs font-semibold ${toneClasses[stat.tone]}`}
-								>
-									{stat.change}
-								</span>
-							</div>
+							<p className="text-sm text-slate-500">{stat.label}</p>
+							<h2 className="mt-3 text-3xl font-bold">{stat.value}</h2>
 						</div>
 					))}
 				</section>
-
 				<section className="grid gap-6 xl:grid-cols-[1.6fr_0.9fr]">
 					<div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-						<div className="mb-6 flex items-center justify-between">
-							<div>
-								<p className="text-sm text-slate-500">Sprint velocity</p>
-								<h3 className="text-xl font-semibold">Weekly workload</h3>
-							</div>
-							<p className="text-sm font-medium text-emerald-600">
-								+18.2% vs last week
-							</p>
-						</div>
-
-						<div className="flex h-52 items-end justify-between gap-3">
-							{sprintData.map((item) => (
+						<p className="text-sm text-slate-500">Ticket activity</p>
+						<h3 className="mt-2 text-xl font-semibold">Last seven days</h3>
+						<div className="mt-6 flex h-52 items-end justify-between gap-3">
+							{activityByDay.map((value, index) => (
 								<div
-									key={item.day}
+									key={days[index].toISOString()}
 									className="flex flex-1 flex-col items-center gap-3"
 								>
 									<div className="flex h-40 w-full items-end justify-center rounded-t-2xl bg-slate-100 p-1">
 										<div
 											className="w-full rounded-t-xl bg-linear-to-t from-blue-700 to-cyan-400"
-											style={{ height: `${item.value}%` }}
+											style={{
+												height: `${Math.max((value / maxActivity) * 100, value ? 8 : 0)}%`,
+											}}
 										/>
 									</div>
 									<span className="text-xs font-medium text-slate-500">
-										{item.day}
+										{days[index].toLocaleDateString(undefined, {
+											weekday: "short",
+										})}
 									</span>
 								</div>
 							))}
 						</div>
 					</div>
-
 					<div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 						<p className="text-sm text-slate-500">Issue split</p>
 						<h3 className="mt-2 text-xl font-semibold">Status overview</h3>
-
 						<div className="mt-6 space-y-5">
-							<div>
-								<div className="mb-1 flex items-center justify-between text-sm">
-									<span className="text-slate-600">Open</span>
-									<span className="font-semibold">42%</span>
+							{[
+								["Open", counts.open, "bg-blue-600"],
+								["In progress", counts.inProgress, "bg-amber-500"],
+								["Resolved", counts.resolved, "bg-emerald-500"],
+							].map(([label, value, color]) => (
+								<div key={label as string}>
+									<div className="mb-1 flex items-center justify-between text-sm">
+										<span className="text-slate-600">{label}</span>
+										<span className="font-semibold">
+											{counts.total
+												? Math.round((Number(value) / counts.total) * 100)
+												: 0}
+											%
+										</span>
+									</div>
+									<div className="h-2.5 rounded-full bg-slate-100">
+										<div
+											className={`h-2.5 rounded-full ${color}`}
+											style={{
+												width: `${counts.total ? (Number(value) / counts.total) * 100 : 0}%`,
+											}}
+										/>
+									</div>
 								</div>
-								<div className="h-2.5 rounded-full bg-slate-100">
-									<div className="h-2.5 w-[42%] rounded-full bg-blue-600" />
-								</div>
-							</div>
-
-							<div>
-								<div className="mb-1 flex items-center justify-between text-sm">
-									<span className="text-slate-600">In progress</span>
-									<span className="font-semibold">31%</span>
-								</div>
-								<div className="h-2.5 rounded-full bg-slate-100">
-									<div className="h-2.5 w-[31%] rounded-full bg-amber-500" />
-								</div>
-							</div>
-
-							<div>
-								<div className="mb-1 flex items-center justify-between text-sm">
-									<span className="text-slate-600">Resolved</span>
-									<span className="font-semibold">27%</span>
-								</div>
-								<div className="h-2.5 rounded-full bg-slate-100">
-									<div className="h-2.5 w-[27%] rounded-full bg-emerald-500" />
-								</div>
-							</div>
+							))}
 						</div>
 					</div>
 				</section>
-
-				<section className="grid gap-6 xl:grid-cols-[1.5fr_0.9fr]">
-					<div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-						<div className="mb-4 flex items-center justify-between">
-							<div>
-								<p className="text-sm text-slate-500">Latest tasks</p>
-								<h3 className="text-xl font-semibold">Recent bugs</h3>
-							</div>
-							<a
-								href="#"
-								className="text-sm font-medium text-blue-700 hover:text-blue-600"
-							>
-								View all
-							</a>
+				<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+					<div className="mb-4 flex items-center justify-between">
+						<div>
+							<p className="text-sm text-slate-500">Latest tickets</p>
+							<h3 className="text-xl font-semibold">Recent issues</h3>
 						</div>
-
+						<Link
+							href="/issues"
+							className="text-sm font-medium text-blue-700 hover:text-blue-600"
+						>
+							View all
+						</Link>
+					</div>
+					{recentTickets.length === 0 ? (
+						<p className="py-8 text-sm text-slate-500">
+							No tickets have been created yet.
+						</p>
+					) : (
 						<div className="overflow-hidden rounded-2xl border border-slate-200">
 							<table className="min-w-full divide-y divide-slate-200 text-left">
 								<thead className="bg-slate-50 text-sm text-slate-500">
@@ -218,57 +244,37 @@ const Dashboard = () => {
 									</tr>
 								</thead>
 								<tbody className="divide-y divide-slate-200 bg-white text-sm">
-									{issues.map((issue) => (
-										<tr key={issue.title} className="hover:bg-slate-50">
+									{recentTickets.map((ticket) => (
+										<tr key={ticket.id} className="hover:bg-slate-50">
 											<td className="px-4 py-3 font-medium text-slate-800">
-												{issue.title}
+												<Link
+													href={`/issues/${ticket.id}`}
+													className="hover:text-blue-700"
+												>
+													{ticket.title}
+												</Link>
 											</td>
 											<td className="px-4 py-3">
 												<span
-													className={`rounded-full px-2.5 py-1 text-xs font-semibold ${priorityClasses[issue.priority]}`}
+													className={`rounded-full px-2.5 py-1 text-xs font-semibold ${priorityClasses[ticket.priority] ?? "bg-slate-100 text-slate-700"}`}
 												>
-													{issue.priority}
+													{ticket.priority}
 												</span>
 											</td>
 											<td className="px-4 py-3 text-slate-600">
-												{issue.status}
+												{statusLabel(ticket.status)}
 											</td>
 											<td className="px-4 py-3 text-slate-600">
-												{issue.owner}
+												{ticket.assignedUser?.name ?? "Unassigned"}
 											</td>
 										</tr>
 									))}
 								</tbody>
 							</table>
 						</div>
-					</div>
-
-					<div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-						<p className="text-sm text-slate-500">Team activity</p>
-						<h3 className="mt-2 text-xl font-semibold">Recent updates</h3>
-
-						<div className="mt-5 space-y-4">
-							{activity.map((item) => (
-								<div
-									key={item.name}
-									className="flex gap-3 rounded-2xl bg-slate-50 p-3"
-								>
-									<div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-700">
-										{item.name.charAt(0)}
-									</div>
-									<div className="min-w-0 flex-1">
-										<p className="font-medium text-slate-800">{item.name}</p>
-										<p className="text-sm text-slate-600">{item.task}</p>
-									</div>
-									<span className="text-xs text-slate-400">{item.time}</span>
-								</div>
-							))}
-						</div>
-					</div>
+					)}
 				</section>
 			</div>
 		</main>
 	);
-};
-
-export default Dashboard;
+}

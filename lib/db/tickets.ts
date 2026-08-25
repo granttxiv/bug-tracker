@@ -1,175 +1,194 @@
 import { db } from "./client";
 import {
-  tickets,
-  ticketComments,
-  ticketActivities,
-  ticketAttachments,
-  users,
-  Ticket,
-  NewTicket,
-  TicketComment,
-  NewTicketComment,
-  TicketActivity,
-  NewTicketActivity,
-  TicketAttachment,
-  NewTicketAttachment,
+	tickets,
+	ticketComments,
+	ticketActivities,
+	ticketAttachments,
+	users,
+	Ticket,
+	NewTicket,
+	TicketComment,
+	NewTicketComment,
+	TicketActivity,
+	NewTicketActivity,
+	TicketAttachment,
+	NewTicketAttachment,
+	TicketStatus,
+	TicketPriority,
 } from "./schema";
-import { eq, and, desc, asc } from "drizzle-orm";
+import { eq, and, desc, asc, count } from "drizzle-orm";
 
 // Create a new ticket
 export async function createTicket(data: NewTicket): Promise<Ticket> {
-  const [ticket] = await db.insert(tickets).values(data).returning();
-  return ticket;
+	const [ticket] = await db.insert(tickets).values(data).returning();
+	return ticket;
 }
 
 // Get ticket by ID with comments and attachments
 export async function getTicketWithDetails(ticketId: string) {
-  const [ticket] = await db.select().from(tickets).where(eq(tickets.id, ticketId));
+	const [ticket] = await db
+		.select()
+		.from(tickets)
+		.where(eq(tickets.id, ticketId));
 
-  if (!ticket) {
-    return null;
-  }
+	if (!ticket) {
+		return null;
+	}
 
-  const comments = await db
-    .select()
-    .from(ticketComments)
-    .where(eq(ticketComments.ticketId, ticketId))
-    .orderBy(asc(ticketComments.createdAt));
+	const comments = await db
+		.select()
+		.from(ticketComments)
+		.where(eq(ticketComments.ticketId, ticketId))
+		.orderBy(asc(ticketComments.createdAt));
 
-  const attachments = await db
-    .select()
-    .from(ticketAttachments)
-    .where(eq(ticketAttachments.ticketId, ticketId))
-    .orderBy(desc(ticketAttachments.createdAt));
+	const attachments = await db
+		.select()
+		.from(ticketAttachments)
+		.where(eq(ticketAttachments.ticketId, ticketId))
+		.orderBy(desc(ticketAttachments.createdAt));
 
-  const assignedUser = ticket.assignedTo
-    ? await db.select().from(users).where(eq(users.id, ticket.assignedTo))
-    : null;
+	const assignedUser = ticket.assignedTo
+		? await db.select().from(users).where(eq(users.id, ticket.assignedTo))
+		: null;
 
-  return {
-    ...ticket,
-    comments,
-    attachments,
-    assignedUser: assignedUser ? assignedUser[0] : null,
-  };
+	return {
+		...ticket,
+		comments,
+		attachments,
+		assignedUser: assignedUser ? assignedUser[0] : null,
+	};
 }
 
 // List tickets for a client with pagination
 export async function listClientTickets(
-  clientId: string,
-  options: {
-    status?: string;
-    priority?: string;
-    limit?: number;
-    offset?: number;
-  } = {},
+	clientId: string,
+	options: {
+		status?: string;
+		priority?: string;
+		limit?: number;
+		offset?: number;
+	} = {},
 ) {
-  const { status, priority, limit = 20, offset = 0 } = options;
+	const { status, priority, limit = 20, offset = 0 } = options;
 
-  const conditions = [eq(tickets.clientId, clientId)];
+	const conditions = [eq(tickets.clientId, clientId)];
 
-  if (status) {
-    conditions.push(eq(tickets.status, status as any));
-  }
+	if (status) {
+		conditions.push(eq(tickets.status, status as TicketStatus));
+	}
 
-  if (priority) {
-    conditions.push(eq(tickets.priority, priority as any));
-  }
+	if (priority) {
+		conditions.push(eq(tickets.priority, priority as TicketPriority));
+	}
 
-  const ticketList = await db
-    .select()
-    .from(tickets)
-    .where(and(...conditions))
-    .orderBy(desc(tickets.createdAt))
-    .limit(limit)
-    .offset(offset);
+	const ticketList = await db
+		.select()
+		.from(tickets)
+		.where(and(...conditions))
+		.orderBy(desc(tickets.createdAt))
+		.limit(limit)
+		.offset(offset);
 
-  // Get total count
-  const countResult = await db
-    .select({ count: db.$count(tickets) })
-    .from(tickets)
-    .where(and(...conditions));
+	// Get total count
+	const countResult = await db
+		.select({ count: count() })
+		.from(tickets)
+		.where(and(...conditions));
 
-  return {
-    tickets: ticketList,
-    total: countResult[0].count,
-    limit,
-    offset,
-  };
+	return {
+		tickets: ticketList,
+		total: Number(countResult[0]?.count ?? 0),
+		limit,
+		offset,
+	};
 }
 
 // Update ticket
 export async function updateTicket(
-  ticketId: string,
-  data: Partial<NewTicket>,
+	ticketId: string,
+	data: Partial<NewTicket>,
 ): Promise<Ticket | null> {
-  const [updated] = await db
-    .update(tickets)
-    .set({ ...data, updatedAt: new Date() })
-    .where(eq(tickets.id, ticketId))
-    .returning();
+	const [updated] = await db
+		.update(tickets)
+		.set({ ...data, updatedAt: new Date() })
+		.where(eq(tickets.id, ticketId))
+		.returning();
 
-  return updated || null;
+	return updated || null;
 }
 
 // Add comment to ticket
-export async function addComment(data: NewTicketComment): Promise<TicketComment> {
-  const [comment] = await db.insert(ticketComments).values(data).returning();
-  return comment;
+export async function addComment(
+	data: NewTicketComment,
+): Promise<TicketComment> {
+	const [comment] = await db.insert(ticketComments).values(data).returning();
+	return comment;
 }
 
 // Get ticket comments
 export async function getTicketComments(ticketId: string) {
-  return db
-    .select()
-    .from(ticketComments)
-    .where(eq(ticketComments.ticketId, ticketId))
-    .orderBy(asc(ticketComments.createdAt));
+	return db
+		.select()
+		.from(ticketComments)
+		.where(eq(ticketComments.ticketId, ticketId))
+		.orderBy(asc(ticketComments.createdAt));
 }
 
 // Log ticket activity
-export async function logActivity(data: NewTicketActivity): Promise<TicketActivity> {
-  const [activity] = await db.insert(ticketActivities).values(data).returning();
-  return activity;
+export async function logActivity(
+	data: NewTicketActivity,
+): Promise<TicketActivity> {
+	const [activity] = await db.insert(ticketActivities).values(data).returning();
+	return activity;
 }
 
 // Get ticket activities
 export async function getTicketActivities(ticketId: string) {
-  return db
-    .select()
-    .from(ticketActivities)
-    .where(eq(ticketActivities.ticketId, ticketId))
-    .orderBy(desc(ticketActivities.createdAt));
+	return db
+		.select()
+		.from(ticketActivities)
+		.where(eq(ticketActivities.ticketId, ticketId))
+		.orderBy(desc(ticketActivities.createdAt));
 }
 
 // Add attachment metadata
-export async function addAttachment(data: NewTicketAttachment): Promise<TicketAttachment> {
-  const [attachment] = await db.insert(ticketAttachments).values(data).returning();
-  return attachment;
+export async function addAttachment(
+	data: NewTicketAttachment,
+): Promise<TicketAttachment> {
+	const [attachment] = await db
+		.insert(ticketAttachments)
+		.values(data)
+		.returning();
+	return attachment;
 }
 
 // Get ticket attachments
 export async function getTicketAttachments(ticketId: string) {
-  return db
-    .select()
-    .from(ticketAttachments)
-    .where(eq(ticketAttachments.ticketId, ticketId))
-    .orderBy(desc(ticketAttachments.createdAt));
+	return db
+		.select()
+		.from(ticketAttachments)
+		.where(eq(ticketAttachments.ticketId, ticketId))
+		.orderBy(desc(ticketAttachments.createdAt));
 }
 
 // Delete attachment
-export async function deleteAttachment(attachmentId: string): Promise<TicketAttachment | null> {
-  const [deleted] = await db
-    .delete(ticketAttachments)
-    .where(eq(ticketAttachments.id, attachmentId))
-    .returning();
+export async function deleteAttachment(
+	attachmentId: string,
+): Promise<TicketAttachment | null> {
+	const [deleted] = await db
+		.delete(ticketAttachments)
+		.where(eq(ticketAttachments.id, attachmentId))
+		.returning();
 
-  return deleted || null;
+	return deleted || null;
 }
 
 // Get single ticket (basic)
 export async function getTicket(ticketId: string): Promise<Ticket | null> {
-  const [ticket] = await db.select().from(tickets).where(eq(tickets.id, ticketId));
+	const [ticket] = await db
+		.select()
+		.from(tickets)
+		.where(eq(tickets.id, ticketId));
 
-  return ticket || null;
+	return ticket || null;
 }
