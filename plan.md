@@ -376,9 +376,9 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 #### 4.4 Testing
 
-- [ ] Create KB article, publish
-- [ ] Search for it, verify returned
-- [ ] Create ticket, verify KB suggestions in response
+- [x] Create KB article, publish
+- [x] Search for it, verify returned
+- [x] Create ticket, verify KB suggestions in response
 
 ---
 
@@ -422,9 +422,9 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 #### 5.6 Testing
 
-- [ ] Create ticket, verify email sent
-- [ ] Assign ticket, verify notification in `/api/notifications`
-- [ ] Update notification preferences, verify respected
+- [x] Create ticket, verify email sent
+- [x] Assign ticket, verify notification in `/api/notifications`
+- [x] Update notification preferences, verify respected
 
 ---
 
@@ -456,42 +456,19 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 ---
 
-### Phase 7: WebSocket & Real-time Updates (Days 43–45)
-
-**Goal**: Real-time notifications and live dashboard updates.
-
-#### 7.1 WebSocket Setup
-
-- [ ] Use Next.js API routes with WebSocket upgrade (Node.js native or library like `ws`)
-- [ ] `WS /api/ws` – Client connects with JWT
-  - Subscribe to: my tickets, assigned tickets, all tickets (admin)
-  - Receive events on: ticket_created, status_changed, comment_added, etc.
-
-#### 7.2 Event Broadcasting
-
-- [ ] On ticket update, broadcast to all connected clients
-- [ ] Use Redis Pub/Sub to scale across multiple server instances
-
-#### 7.3 Testing
-
-- [ ] Connect WebSocket, create ticket, verify event received in another connection
-- [ ] Disconnect/reconnect, verify no message loss
-
----
-
 ### Phase 8: Testing, Security, Polish (Days 46–50)
 
 **Goal**: Hardened, tested, production-ready backend.
 
 #### 8.1 Security Audit
 
-- [ ] [ ] Rate limiting on auth endpoints (prevent brute force)
-- [ ] [ ] CORS configuration (allow frontend origin only)
-- [ ] [ ] Input validation on all endpoints (use `zod`)
-- [ ] [ ] SQL injection prevention (use ORM, parameterized queries)
-- [ ] [ ] XSS prevention (sanitize rich text in comments)
-- [ ] [ ] CSRF tokens if needed
-- [ ] [ ] Secure headers (Helmet.js)
+- [ ] Rate limiting on auth endpoints (prevent brute force)
+- [ ] CORS configuration (allow frontend origin only)
+- [ ] Input validation on all endpoints (use `zod`)
+- [ ] SQL injection prevention (use ORM, parameterized queries)
+- [ ] XSS prevention (sanitize rich text in comments)
+- [ ] CSRF tokens if needed
+- [ ] Secure headers (Helmet.js)
 
 #### 8.2 Unit & Integration Tests
 
