@@ -11,7 +11,7 @@ export interface JWTPayload {
   exp?: number;
 }
 
-export function generateToken(user: User): string {
+export function generateToken(user: Pick<User, "id" | "email" | "role">): string {
   return jwt.sign(
     {
       userId: user.id,
