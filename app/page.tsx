@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -73,9 +73,14 @@ export default function Home() {
 									</Link>
 								</div>
 							) : (
-								<button className="bg-blue-800 rounded-2xl p-3">
-									<Link href={"/register"}>Get started</Link>
-								</button>
+								<div className="flex justify-between">
+									<button className="bg-blue-800 rounded-2xl p-3 text-white mt-4">
+										<Link href={"/register"}>Get started</Link>
+									</button>
+									<button className="bg-blue-800 rounded-2xl p-3 text-white mt-4">
+										<Link href={"/login"}>Login</Link>
+									</button>
+								</div>
 							)}
 
 							<div className="mt-8 flex flex-wrap gap-3">

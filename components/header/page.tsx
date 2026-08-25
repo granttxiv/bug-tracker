@@ -25,11 +25,13 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [search, setSearch] = useState("");
 	const [profileInitials, setProfileInitials] = useState("?");
+	const [user, setUser] = useState("");
 
 	useEffect(() => {
 		const readProfile = () => {
 			try {
-				const storedUser = localStorage.getItem("bug_tracker_user");
+				const storedUser = localStorage.getItem("bug_tracker_user") as string;
+				setUser(storedUser);
 				const user = storedUser
 					? (JSON.parse(storedUser) as { name?: string })
 					: null;
@@ -145,16 +147,18 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 						/>
 					</form>
 					<div className="grid gap-1">
-						{navigation.map((item) => (
-							<Link
-								key={item.href}
-								href={item.href}
-								onClick={() => setIsOpen(false)}
-								className={`rounded-lg px-3 py-2 text-sm font-medium ${pathname === item.href ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"}`}
-							>
-								{item.label}
-							</Link>
-						))}
+						{user
+							? navigation.map((item) => (
+									<Link
+										key={item.href}
+										href={item.href}
+										onClick={() => setIsOpen(false)}
+										className={`rounded-lg px-3 py-2 text-sm font-medium ${pathname === item.href ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"}`}
+									>
+										{item.label}
+									</Link>
+								))
+							: " "}
 					</div>
 				</div>
 			)}
