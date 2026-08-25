@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const featureCards = [
 	{
@@ -33,7 +34,11 @@ const highlights = [
 ];
 
 export default function Home() {
-	const user = localStorage.getItem("bug_tracker_token");
+	const [user, setUser] = useState("");
+	useEffect(() => {
+		const user = localStorage.getItem("bug_tracker_token") as string;
+		setUser(user);
+	});
 	return (
 		<main className="min-h-screen bg-linear-to-br from-slate-100 via-white to-slate-200 px-5 py-8 md:px-8 md:py-12">
 			<div className="mx-auto max-w-6xl">
