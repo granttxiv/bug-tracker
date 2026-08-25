@@ -1,3 +1,4 @@
+import { noop } from "../server.utils";
 import { db } from "./client";
 import {
   notifications,
@@ -14,13 +15,19 @@ export async function createNotification(data: NewNotification) {
 }
 
 export async function getUserNotifications(userId: string, limit = 20, offset = 0) {
-  return db
-    .select()
-    .from(notifications)
-    .where(eq(notifications.userId, userId))
-    .orderBy(desc(notifications.createdAt))
-    .limit(limit)
-    .offset(offset);
+  try {
+    const notifs = await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt))
+      .limit(limit)
+      .offset(offset);
+    return notifs;
+  } catch (error) {
+    noop(error);
+    return [];
+  }
 }
 
 export async function markAsRead(notificationId: string) {
@@ -34,11 +41,16 @@ export async function markAsRead(notificationId: string) {
 
 // Preferences
 export async function getPreferences(userId: string) {
-  const [prefs] = await db
-    .select()
-    .from(notificationPreferences)
-    .where(eq(notificationPreferences.userId, userId));
-  return prefs || null;
+  try {
+    const [prefs] = await db
+      .select()
+      .from(notificationPreferences)
+      .where(eq(notificationPreferences.userId, userId));
+    return prefs || null;
+  } catch (error) {
+    noop(error);
+    return null;
+  }
 }
 
 export async function createPreferences(userId: string) {

@@ -360,7 +360,7 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 #### 4.2 Knowledge Base API
 
 - [x] `GET /api/kb/articles` – List published articles (paginated, by category)
-- [x] `GET /api/kb/articles/search?q=...` – Full-text search
+- [x] `GET /api/kb/articles?q=...` – Full-text search
   - Search in: title, content, tags
   - Return ranked results
 - [x] `GET /api/kb/articles/:id` – Get single article

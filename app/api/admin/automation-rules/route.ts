@@ -4,7 +4,7 @@ import type { AuthenticatedRequest } from "@/lib/auth/middleware";
 import { getAutomationRules, createAutomationRule } from "@/lib/db/automation";
 
 // GET /api/admin/automation-rules
-export const GET = withRole(["admin"], async (_req, _ctx) => {
+export const GET = withRole(["admin"])(async (_req, _ctx) => {
   try {
     const rules = await getAutomationRules();
     return NextResponse.json(rules);
@@ -15,7 +15,7 @@ export const GET = withRole(["admin"], async (_req, _ctx) => {
 });
 
 // POST /api/admin/automation-rules
-export const POST = withRole(["admin"], async (req: AuthenticatedRequest, _ctx) => {
+export const POST = withRole(["admin"])(async (req: AuthenticatedRequest, _ctx) => {
   try {
     const body = await req.json();
 

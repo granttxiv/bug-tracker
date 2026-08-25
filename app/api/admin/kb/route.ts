@@ -3,7 +3,7 @@ import { withRole } from "@/lib/auth/middleware";
 import type { AuthenticatedRequest } from "@/lib/auth/middleware";
 import { createKBArticle } from "@/lib/db/kb";
 
-export const POST = withRole(["admin"], async (req: AuthenticatedRequest, _ctx) => {
+export const POST = withRole(["admin"])(async (req: AuthenticatedRequest, _ctx) => {
   try {
     const body = await req.json();
 

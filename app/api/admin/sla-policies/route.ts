@@ -3,7 +3,7 @@ import { withRole } from "@/lib/auth/middleware";
 import type { AuthenticatedRequest } from "@/lib/auth/middleware";
 import { getSLAPolicies, createSLAPolicy } from "@/lib/db/automation";
 
-export const GET = withRole(["admin"], async (_req, _ctx) => {
+export const GET = withRole(["admin"])(async (_req, _ctx) => {
   try {
     const policies = await getSLAPolicies();
     return NextResponse.json(policies);
@@ -13,7 +13,7 @@ export const GET = withRole(["admin"], async (_req, _ctx) => {
   }
 });
 
-export const POST = withRole(["admin"], async (req: AuthenticatedRequest, _ctx) => {
+export const POST = withRole(["admin"])(async (req: AuthenticatedRequest, _ctx) => {
   try {
     const body = await req.json();
 
