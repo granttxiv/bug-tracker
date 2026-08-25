@@ -4,6 +4,8 @@ import { CreateTicketSchema, ListTicketsSchema } from "@/lib/types/ticket";
 import { createTicket, listClientTickets, logActivity } from "@/lib/db/tickets";
 import { evaluateAutomationRules, applySLAPolicy } from "@/lib/services/automationEngine";
 import { searchArticles } from "@/lib/db/kb";
+import { createNotification } from "@/lib/db/notifications";
+import { sendEmail, getTicketCreatedEmail } from "@/lib/services/emailService";
 
 export const POST = withAuth(async (req: AuthenticatedRequest) => {
   try {
@@ -61,6 +63,23 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
 
     // Get KB suggestions (Phase 4)
     const suggestions = await searchArticles(`${ticket.title} ${ticket.description}`, 3);
+
+    // Send notifications (Phase 5)
+    await createNotification({
+      userId: ticket.clientId,
+      type: "ticket_created",
+      title: "Ticket Created",
+      message: `Your ticket "${ticket.title}" has been received.`,
+      ticketId: ticket.id,
+    });
+
+    // Send email (Phase 5)
+    const emailTemplate = getTicketCreatedEmail(
+      req.user!.email || "Client",
+      ticket.title,
+      ticket.id,
+    );
+    await sendEmail({ to: req.user!.email || "", ...emailTemplate });
 
     return NextResponse.json({ ...ticket, kbSuggestions: suggestions }, { status: 201 });
   } catch (error) {

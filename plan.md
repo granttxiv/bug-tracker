@@ -355,38 +355,38 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 #### 3.1 Database Schema
 
-- [ ] Create `automation_rules` table
-- [ ] Create `sla_policies` table
-- [ ] Create `sla_breaches` table
+- [x] Create `automation_rules` table
+- [x] Create `sla_policies` table
+- [x] Create `sla_breaches` table
 
 #### 3.2 Automation Engine
 
-- [ ] Build `services/automationEngine.ts`
+- [x] Build `services/automationEngine.ts`
   - Load active rules from DB
   - On ticket creation/update: evaluate conditions (priority, type, etc.)
   - Execute actions: auto-assign, change priority, send notification
   - Log executions for debugging
-- [ ] Hook automation engine into:
+- [x] Hook automation engine into:
   - `POST /api/tickets` (on creation)
   - `PATCH /api/agent/tickets/:id` (on update)
 
 #### 3.3 SLA Tracking
 
-- [ ] On ticket creation: check matching SLA policy, set timers
+- [x] On ticket creation: check matching SLA policy, set timers
   - `first_response_due_at` = now + policy.response_time_hours
   - `resolution_due_at` = now + policy.resolution_time_hours
-- [ ] Build SLA breach check (cron or on-demand)
+- [x] Build SLA breach check (cron or on-demand)
   - If first response missed: create breach record, notify agent
   - If resolution missed: create breach record, escalate
-- [ ] `GET /api/admin/reports/sla` – SLA compliance stats
+- [x] `GET /api/admin/reports/sla` – SLA compliance stats
 
 #### 3.4 Admin Endpoints (Rule & Policy Management)
 
-- [ ] `GET /api/admin/automation-rules` – List rules
-- [ ] `POST /api/admin/automation-rules` – Create rule
-- [ ] `PATCH /api/admin/automation-rules/:id` – Update
-- [ ] `DELETE /api/admin/automation-rules/:id` – Delete
-- [ ] Same for `sla-policies`
+- [x] `GET /api/admin/automation-rules` – List rules
+- [x] `POST /api/admin/automation-rules` – Create rule
+- [x] `PATCH /api/admin/automation-rules/:id` – Update
+- [x] `DELETE /api/admin/automation-rules/:id` – Delete
+- [x] Same for `sla-policies`
 
 #### 3.5 Testing
 
@@ -403,24 +403,24 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 #### 4.1 Database Schema
 
-- [ ] Create `kb_articles` table with full-text index
+- [x] Create `kb_articles` table with full-text index
 
 #### 4.2 Knowledge Base API
 
-- [ ] `GET /api/kb/articles` – List published articles (paginated, by category)
-- [ ] `GET /api/kb/articles/search?q=...` – Full-text search
+- [x] `GET /api/kb/articles` – List published articles (paginated, by category)
+- [x] `GET /api/kb/articles/search?q=...` – Full-text search
   - Search in: title, content, tags
   - Return ranked results
-- [ ] `GET /api/kb/articles/:id` – Get single article
-- [ ] `POST /api/admin/kb/articles` – Create article (admin)
-- [ ] `PATCH /api/admin/kb/articles/:id` – Update (admin)
-- [ ] `DELETE /api/admin/kb/articles/:id` – Delete (admin)
+- [x] `GET /api/kb/articles/:id` – Get single article
+- [x] `POST /api/admin/kb/articles` – Create article (admin)
+- [x] `PATCH /api/admin/kb/articles/:id` – Update (admin)
+- [x] `DELETE /api/admin/kb/articles/:id` – Delete (admin)
 
 #### 4.3 Optional: KB Suggestions
 
-- [ ] On `POST /api/tickets`, call KB search with ticket title/description
-- [ ] Return suggested articles in response (help deflect)
-- [ ] Frontend can show "Before creating a ticket, check these articles..."
+- [x] On `POST /api/tickets`, call KB search with ticket title/description
+- [x] Return suggested articles in response (help deflect)
+- [x] Frontend can show "Before creating a ticket, check these articles..."
 
 #### 4.4 Testing
 
@@ -436,14 +436,14 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 #### 5.1 Database Schema
 
-- [ ] Create `notifications` table
-- [ ] Create `notification_preferences` table
+- [x] Create `notifications` table
+- [x] Create `notification_preferences` table
 
 #### 5.2 Email Notifications
 
 - [ ] Add SendGrid or SES SDK
-- [ ] Build `services/emailService.ts`
-- [ ] Trigger on:
+- [x] Build `services/emailService.ts`
+- [x] Trigger on:
   - Ticket created: send confirmation to client
   - Ticket assigned: notify assigned agent
   - Comment added: notify watchers
@@ -452,14 +452,14 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 #### 5.3 In-App Notifications
 
-- [ ] `POST /api/notifications` – Create notification record
-- [ ] `GET /api/notifications` – List user's notifications
-- [ ] `PATCH /api/notifications/:id` – Mark as read
+- [x] `POST /api/notifications` – Create notification record
+- [x] `GET /api/notifications` – List user's notifications
+- [x] `PATCH /api/notifications/:id` – Mark as read
 
 #### 5.4 Notification Preferences
 
-- [ ] `GET /api/notifications/preferences` – Get user's preferences
-- [ ] `PATCH /api/notifications/preferences` – User can opt-in/out by channel
+- [x] `GET /api/notifications/preferences` – Get user's preferences
+- [x] `PATCH /api/notifications/preferences` – User can opt-in/out by channel
 
 #### 5.5 Optional: Slack/Teams Integration
 

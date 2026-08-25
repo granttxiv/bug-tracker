@@ -31,6 +31,12 @@ export const ticketActivityActionEnum = pgEnum("ticket_activity_action", [
   "attachment_added",
 ]);
 export const commentTypeEnum = pgEnum("comment_type", ["public_reply", "internal_note"]);
+export const notificationTypeEnum = pgEnum("notification_type", [
+  "ticket_created",
+  "ticket_assigned",
+  "comment_added",
+  "sla_breach",
+]);
 
 // Users table
 export const users = pgTable("users", {
@@ -263,3 +269,49 @@ export const kbArticles = pgTable(
 
 export type KBArticle = typeof kbArticles.$inferSelect;
 export type NewKBArticle = typeof kbArticles.$inferInsert;
+
+// Notifications (Phase 5)
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    type: notificationTypeEnum("type").notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    message: text("message"),
+    ticketId: uuid("ticket_id").references(() => tickets.id, { onDelete: "cascade" }),
+    isRead: boolean("is_read").notNull().default(false),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_notifications_user_id").on(table.userId),
+    index("idx_notifications_is_read").on(table.isRead),
+  ],
+);
+
+// Notification Preferences (Phase 5)
+export const notificationPreferences = pgTable(
+  "notification_preferences",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .unique()
+      .notNull(),
+    emailOnTicketCreated: boolean("email_on_ticket_created").notNull().default(true),
+    emailOnAssigned: boolean("email_on_assigned").notNull().default(true),
+    emailOnComment: boolean("email_on_comment").notNull().default(true),
+    emailOnSLABreach: boolean("email_on_sla_breach").notNull().default(true),
+    inAppNotifications: boolean("in_app_notifications").notNull().default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [index("idx_notification_prefs_user_id").on(table.userId)],
+);
+
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;
+export type NotificationPreference = typeof notificationPreferences.$inferSelect;
+export type NewNotificationPreference = typeof notificationPreferences.$inferInsert;
