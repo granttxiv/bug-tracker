@@ -349,54 +349,6 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 - [x] Quick test reference (QUICK_TEST.md)
 - [x] Automated test script (test-phase2.sh)
 
-### Phase 3: Automation & SLA (Days 19–25)
-
-**Goal**: Rule-based ticket handling and SLA tracking.
-
-#### 3.1 Database Schema
-
-- [x] Create `automation_rules` table
-- [x] Create `sla_policies` table
-- [x] Create `sla_breaches` table
-
-#### 3.2 Automation Engine
-
-- [x] Build `services/automationEngine.ts`
-  - Load active rules from DB
-  - On ticket creation/update: evaluate conditions (priority, type, etc.)
-  - Execute actions: auto-assign, change priority, send notification
-  - Log executions for debugging
-- [x] Hook automation engine into:
-  - `POST /api/tickets` (on creation)
-  - `PATCH /api/agent/tickets/:id` (on update)
-
-#### 3.3 SLA Tracking
-
-- [x] On ticket creation: check matching SLA policy, set timers
-  - `first_response_due_at` = now + policy.response_time_hours
-  - `resolution_due_at` = now + policy.resolution_time_hours
-- [x] Build SLA breach check (cron or on-demand)
-  - If first response missed: create breach record, notify agent
-  - If resolution missed: create breach record, escalate
-- [x] `GET /api/admin/reports/sla` – SLA compliance stats
-
-#### 3.4 Admin Endpoints (Rule & Policy Management)
-
-- [x] `GET /api/admin/automation-rules` – List rules
-- [x] `POST /api/admin/automation-rules` – Create rule
-- [x] `PATCH /api/admin/automation-rules/:id` – Update
-- [x] `DELETE /api/admin/automation-rules/:id` – Delete
-- [x] Same for `sla-policies`
-
-#### 3.5 Testing
-
-- [ ] Create automation rule: if type=bug and priority=critical, assign to senior agent
-- [ ] Create ticket matching rule, verify assigned automatically
-- [ ] Check SLA timers created correctly
-- [ ] Simulate SLA breach, verify notification triggered
-
----
-
 ### Phase 4: Knowledge Base & Search (Days 26–30)
 
 **Goal**: Self-service content to deflect common tickets.
@@ -482,19 +434,22 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 #### 6.1 Admin Reporting Endpoints
 
-- [ ] `GET /api/admin/reports/volume` – Tickets by status, type, date
-- [ ] `GET /api/admin/reports/resolution-time` – Avg/median time to resolve
-- [ ] `GET /api/admin/reports/agent-performance` – Tickets assigned, resolved, avg time
-- [ ] `GET /api/admin/reports/sla-compliance` – SLA breach rates by priority
-- [ ] All reports: support date range filters, export to CSV option
+- [x] `GET /api/admin/reports/volume` – Tickets by status, type, priority; supports `?startDate=ISO&endDate=ISO`
+- [x] `GET /api/admin/reports/resolution-time` – Avg hours to resolve; supports date filters
+- [x] `GET /api/admin/reports/agent-performance` – Tickets assigned/resolved per agent
+- [x] `GET /api/admin/reports/sla-compliance` – SLA breaches by type; supports date filters
+- [x] All endpoints: admin-only auth, Zod validation
 
 #### 6.2 Metrics Service
 
-- [ ] Build `services/metricsService.ts` with reusable aggregation queries
-  - Use PostgreSQL grouping, aggregates
-  - Cache results in Redis (1-hour TTL) for heavy queries
+- [x] `lib/services/metricsService.ts` – 5 functions (volume, resolution time, agent perf, SLA compliance, total count)
+  - PostgreSQL grouping, aggregates, EXTRACT for time calculations
+  - Redis caching deferred (not yet needed)
 
 #### 6.3 Testing
+
+- [x] Endpoints created in `/app/api/admin/reports/{volume,resolution-time,agent-performance,sla-compliance}/route.ts`
+- [x] Test with: `curl -H "Authorization: Bearer <token>" http://localhost:3000/api/admin/reports/volume`
 
 - [ ] Create 10 tickets, some resolved
 - [ ] Query volume report, verify counts

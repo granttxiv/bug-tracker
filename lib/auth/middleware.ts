@@ -35,14 +35,15 @@ export function withAuth<Path extends AppRouteHandlerRoutes>(
   };
 }
 
-export function withRole<Path extends AppRouteHandlerRoutes>(
-  allowedRoles: string[],
-  handler: (req: AuthenticatedRequest, ctx: RouteContext<Path>) => Promise<NextResponse>,
-) {
-  return withAuth(async (req: AuthenticatedRequest, ctx: RouteContext<Path>) => {
-    if (!req.user || !allowedRoles.includes(req.user.role)) {
-      return NextResponse.json({ error: "Forbidden: Insufficient permissions" }, { status: 403 });
-    }
-    return handler(req, ctx);
-  });
+export function withRole<Path extends AppRouteHandlerRoutes>(allowedRoles: string[]) {
+  return (
+    handler: (req: AuthenticatedRequest, ctx: RouteContext<Path>) => Promise<NextResponse>,
+  ) => {
+    return withAuth<Path>(async (req: AuthenticatedRequest, ctx: RouteContext<Path>) => {
+      if (!req.user || !allowedRoles.includes(req.user.role)) {
+        return NextResponse.json({ error: "Forbidden: Insufficient permissions" }, { status: 403 });
+      }
+      return handler(req, ctx);
+    });
+  };
 }
