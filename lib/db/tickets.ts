@@ -4,6 +4,7 @@ import {
 	ticketComments,
 	ticketActivities,
 	ticketAttachments,
+	ticketMembers,
 	users,
 	Ticket,
 	NewTicket,
@@ -22,6 +23,27 @@ import { eq, and, desc, asc, count } from "drizzle-orm";
 export async function createTicket(data: NewTicket): Promise<Ticket> {
 	const [ticket] = await db.insert(tickets).values(data).returning();
 	return ticket;
+}
+
+export async function addTicketMembers(ticketId: string, userIds: string[]) {
+	if (userIds.length === 0) return [];
+	return db
+		.insert(ticketMembers)
+		.values([...new Set(userIds)].map((userId) => ({ ticketId, userId })))
+		.returning();
+}
+
+export async function getTicketMembers(ticketId: string) {
+	return db
+		.select({
+			id: users.id,
+			name: users.name,
+			email: users.email,
+			role: users.role,
+		})
+		.from(ticketMembers)
+		.innerJoin(users, eq(ticketMembers.userId, users.id))
+		.where(eq(ticketMembers.ticketId, ticketId));
 }
 
 // Get ticket by ID with comments and attachments
@@ -50,12 +72,14 @@ export async function getTicketWithDetails(ticketId: string) {
 	const assignedUser = ticket.assignedTo
 		? await db.select().from(users).where(eq(users.id, ticket.assignedTo))
 		: null;
+	const members = await getTicketMembers(ticketId);
 
 	return {
 		...ticket,
 		comments,
 		attachments,
 		assignedUser: assignedUser ? assignedUser[0] : null,
+		members,
 	};
 }
 

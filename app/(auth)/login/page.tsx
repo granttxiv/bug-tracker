@@ -5,6 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
+import { apiClient } from "@/app/api/requestProcessor";
 
 type LoginFormValues = {
 	email: string;
@@ -25,7 +26,7 @@ const Login = () => {
 	const onSubmit = async (data: LoginFormValues) => {
 		setSubmitError("");
 		try {
-			const response = await axios.post("/api/auth/login", data);
+			const response = await apiClient.post("/api/auth/login", data);
 			if (response.status === 200) {
 				localStorage.setItem("bug_tracker_token", response.data.token);
 				localStorage.setItem(
@@ -51,7 +52,7 @@ const Login = () => {
 				<div className="flex flex-col justify-center px-6 py-12 sm:px-14">
 					<Link
 						href="/"
-						className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700"
+						className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-800"
 					>
 						Bug Tracker
 					</Link>
@@ -100,7 +101,7 @@ const Login = () => {
 									type={showPassword ? "text" : "password"}
 									id="login-password"
 									placeholder="Enter your password"
-									className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 pr-11 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100"
+									className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 pr-11 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-700 focus:bg-white focus:ring-4 focus:ring-blue-100"
 									{...register("password", {
 										required: "Password is required",
 									})}
@@ -135,7 +136,7 @@ const Login = () => {
 							</button>
 							<Link
 								href="/register"
-								className="text-xs font-semibold text-blue-700 transition hover:text-blue-600"
+								className="text-xs font-semibold text-blue-700 transition hover:text-blue-700"
 							>
 								Create account
 							</Link>
@@ -149,7 +150,7 @@ const Login = () => {
 
 						<button
 							type="submit"
-							className="mt-2 h-12 rounded-xl bg-blue-700 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600 active:scale-[0.99]"
+							className="mt-2 h-12 rounded-xl bg-blue-800 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.99]"
 						>
 							Sign In
 						</button>
@@ -180,7 +181,7 @@ const Login = () => {
 							<p className="text-sm text-emerald-200">Team workflow</p>
 							<p className="mt-2 text-3xl font-bold text-emerald-300">Clear</p>
 						</div>
-						<div className="col-span-2 flex items-center justify-between rounded-2xl bg-blue-500 p-5">
+						<div className="col-span-2 flex items-center justify-between rounded-2xl bg-blue-600 p-5">
 							<div>
 								<p className="text-sm text-blue-100">Sprint health</p>
 								<p className="mt-1 text-2xl font-bold">On track</p>

@@ -4,6 +4,8 @@ export const CreateTicketSchema = z.object({
 	title: z.string().min(5).max(255),
 	description: z.string().min(10),
 	type: z.enum(["bug", "feature_request", "support"]),
+	assignedTo: z.string().uuid("Invalid assignee").optional(),
+	memberIds: z.array(z.string().uuid("Invalid team member")).max(20).optional(),
 	priority: z.enum(["critical", "high", "medium", "low"]).default("medium"),
 	version: z.string().max(100).optional(),
 	environment: z.enum(["production", "staging", "development"]).optional(),
