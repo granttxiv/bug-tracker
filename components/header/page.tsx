@@ -89,19 +89,22 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 				</form>
 
 				<div className="hidden items-center gap-1 lg:flex">
-					{navigation.map((item) => {
-						const isActive =
-							pathname === item.href || pathname.startsWith(`${item.href}/`);
-						return (
-							<Link
-								key={item.href}
-								href={item.href}
-								className={`rounded-lg px-3 py-2 text-sm font-medium transition ${isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
-							>
-								{item.label}
-							</Link>
-						);
-					})}
+					{user
+						? navigation.map((item) => {
+								const isActive =
+									pathname === item.href ||
+									pathname.startsWith(`${item.href}/`);
+								return (
+									<Link
+										key={item.href}
+										href={item.href}
+										className={`rounded-lg px-3 py-2 text-sm font-medium transition ${isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
+									>
+										{item.label}
+									</Link>
+								);
+							})
+						: null}
 				</div>
 
 				<div className="ml-auto flex items-center gap-2">
@@ -151,23 +154,19 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 							className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 text-sm outline-none focus:border-blue-500"
 						/>
 					</form>
-					<div className="hidden items-center gap-1 lg:flex">
+					<div className="grid gap-1">
 						{user
-							? navigation.map((item) => {
-									const isActive =
-										pathname === item.href ||
-										pathname.startsWith(`${item.href}/`);
-									return (
-										<Link
-											key={item.href}
-											href={item.href}
-											className={`rounded-lg px-3 py-2 text-sm font-medium transition ${isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
-										>
-											{item.label}
-										</Link>
-									);
-								})
-							: null}
+							? navigation.map((item) => (
+									<Link
+										key={item.href}
+										href={item.href}
+										onClick={() => setIsOpen(false)}
+										className={`rounded-lg px-3 py-2 text-sm font-medium ${pathname === item.href ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"}`}
+									>
+										{item.label}
+									</Link>
+								))
+							: " "}
 					</div>
 				</div>
 			)}
