@@ -1,5 +1,5 @@
 "use client";
-import NavHeader from "@/app/layouts/header/page";
+import NavHeader from "@/components/header/page";
 import { usePathname } from "next/navigation";
 
 const AuthLogic = () => {

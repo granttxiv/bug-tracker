@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Filter, Search } from "lucide-react";
-import AddItemButton from "../../(components)/addItem/page";
+import AddItemButton from "../../../components/addItem/page";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { apiClient } from "@/app/api/requestProcessor";
 
