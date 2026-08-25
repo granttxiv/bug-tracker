@@ -450,10 +450,9 @@ WS     /api/ws                     → Subscribe to: ticket updates, SLA alerts,
 
 - [x] Endpoints created in `/app/api/admin/reports/{volume,resolution-time,agent-performance,sla-compliance}/route.ts`
 - [x] Test with: `curl -H "Authorization: Bearer <token>" http://localhost:3000/api/admin/reports/volume`
-
-- [ ] Create 10 tickets, some resolved
-- [ ] Query volume report, verify counts
-- [ ] Query agent performance, verify correct
+- [x] Create 10 tickets, some resolved
+- [x] Query volume report, verify counts
+- [x] Query agent performance, verify correct
 
 ---
 
