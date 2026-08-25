@@ -33,6 +33,7 @@ const highlights = [
 ];
 
 export default function Home() {
+	const user = localStorage.getItem("bug_tracker_token");
 	return (
 		<main className="min-h-screen bg-linear-to-br from-slate-100 via-white to-slate-200 px-5 py-8 md:px-8 md:py-12">
 			<div className="mx-auto max-w-6xl">
@@ -50,20 +51,26 @@ export default function Home() {
 								team updates, and the full lifecycle of every bug.
 							</p>
 
-							<div className="mt-7 flex flex-wrap gap-3">
-								<Link
-									href="/dashboard"
-									className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-600"
-								>
-									Open dashboard
-								</Link>
-								<Link
-									href="/issues"
-									className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-								>
-									Review issues
-								</Link>
-							</div>
+							{user ? (
+								<div className="mt-7 flex flex-wrap gap-3">
+									<Link
+										href="/dashboard"
+										className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-600"
+									>
+										Open dashboard
+									</Link>
+									<Link
+										href="/issues"
+										className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+									>
+										Review issues
+									</Link>
+								</div>
+							) : (
+								<button className="bg-blue-800 rounded-2xl p-3">
+									<Link href={"/register"}>Get started</Link>
+								</button>
+							)}
 
 							<div className="mt-8 flex flex-wrap gap-3">
 								{highlights.map((item) => (
@@ -101,25 +108,29 @@ export default function Home() {
 					</div>
 				</section>
 
-				<section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-					{featureCards.map((card) => (
-						<Link
-							key={card.title}
-							href={card.href}
-							className="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-						>
-							<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-								Workspace
-							</p>
-							<h3 className="mt-4 text-xl font-semibold text-slate-900">
-								{card.title}
-							</h3>
-							<p className="mt-2 text-sm leading-6 text-slate-600">
-								{card.description}
-							</p>
-						</Link>
-					))}
-				</section>
+				{user ? (
+					<section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+						{featureCards.map((card) => (
+							<Link
+								key={card.title}
+								href={card.href}
+								className="rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+							>
+								<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+									Workspace
+								</p>
+								<h3 className="mt-4 text-xl font-semibold text-slate-900">
+									{card.title}
+								</h3>
+								<p className="mt-2 text-sm leading-6 text-slate-600">
+									{card.description}
+								</p>
+							</Link>
+						))}
+					</section>
+				) : (
+					""
+				)}
 			</div>
 		</main>
 	);
