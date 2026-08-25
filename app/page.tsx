@@ -61,7 +61,7 @@ export default function Home() {
 								<div className="mt-7 flex flex-wrap gap-3">
 									<Link
 										href="/dashboard"
-										className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-600"
+										className="rounded-xl bg-blue-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
 									>
 										Open dashboard
 									</Link>
@@ -73,13 +73,20 @@ export default function Home() {
 									</Link>
 								</div>
 							) : (
-								<div className="flex justify-between">
-									<button className="bg-blue-800 rounded-2xl p-3 text-white mt-4">
-										<Link href={"/register"}>Get started</Link>
-									</button>
-									<button className="bg-blue-800 rounded-2xl p-3 text-white mt-4">
-										<Link href={"/login"}>Login</Link>
-									</button>
+								<div className="mt-7 flex flex-wrap gap-3">
+									<Link
+										href={"/register"}
+										className="rounded-xl bg-blue-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+									>
+										Get started
+									</Link>
+
+									<Link
+										href={"/login"}
+										className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+									>
+										Login
+									</Link>
 								</div>
 							)}
 

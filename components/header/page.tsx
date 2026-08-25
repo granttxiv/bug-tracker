@@ -106,7 +106,7 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 				<div className="ml-auto flex items-center gap-2">
 					<Link
 						href="/issues"
-						className="hidden items-center gap-1.5 rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600 sm:inline-flex"
+						className="hidden items-center gap-1.5 rounded-lg bg-blue-800 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 sm:inline-flex"
 					>
 						<Plus size={16} />
 						Create
