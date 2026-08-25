@@ -62,7 +62,7 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 					href="/"
 					className="flex shrink-0 items-center gap-2 text-slate-900"
 				>
-					<span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-700 text-sm font-black text-white">
+					<span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-800 text-sm font-black text-white">
 						B
 					</span>
 					<span className="hidden text-sm font-bold tracking-tight sm:inline">
@@ -151,19 +151,23 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 							className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 text-sm outline-none focus:border-blue-500"
 						/>
 					</form>
-					<div className="grid gap-1">
+					<div className="hidden items-center gap-1 lg:flex">
 						{user
-							? navigation.map((item) => (
-									<Link
-										key={item.href}
-										href={item.href}
-										onClick={() => setIsOpen(false)}
-										className={`rounded-lg px-3 py-2 text-sm font-medium ${pathname === item.href ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"}`}
-									>
-										{item.label}
-									</Link>
-								))
-							: " "}
+							? navigation.map((item) => {
+									const isActive =
+										pathname === item.href ||
+										pathname.startsWith(`${item.href}/`);
+									return (
+										<Link
+											key={item.href}
+											href={item.href}
+											className={`rounded-lg px-3 py-2 text-sm font-medium transition ${isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
+										>
+											{item.label}
+										</Link>
+									);
+								})
+							: null}
 					</div>
 				</div>
 			)}
@@ -171,4 +175,4 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 	);
 };
 
-export default NavHeader;	
+export default NavHeader;
