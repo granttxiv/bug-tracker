@@ -1,11 +1,11 @@
 "use client";
 
-import axios from "axios";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Filter, Search } from "lucide-react";
 import AddItemButton from "../../(components)/addItem/page";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import { apiClient } from "@/app/api/requestProcessor";
 
 type Issue = {
 	id: string;
@@ -168,15 +168,22 @@ const IssuesPage = () => {
 						</button>
 						<AddItemButton
 							mode="issue"
-							onAdd={async (title, description, priority) => {
+							onAdd={async (
+								title,
+								description,
+								priority,
+								_status,
+								assignedTo,
+							) => {
 								const token = localStorage.getItem("bug_tracker_token");
-								const response = await axios.post(
+								const response = await apiClient.post(
 									"/api/tickets",
 									{
 										title,
 										description,
 										type: "bug",
 										priority: priority.toLowerCase(),
+										assignedTo,
 									},
 									{ headers: { Authorization: `Bearer ${token}` } },
 								);

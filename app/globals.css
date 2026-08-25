@@ -3,6 +3,27 @@
 :root {
 	--background: #f4f5f7;
 	--foreground: #172b4d;
+	--accent-color: #1d4ed8;
+}
+
+html[data-accent="bg-violet-600"] {
+	--accent-color: #7c3aed;
+}
+
+html[data-accent="bg-emerald-600"] {
+	--accent-color: #059669;
+}
+
+html[data-accent="bg-amber-500"] {
+	--accent-color: #d97706;
+}
+
+html[data-accent] .bg-blue-700 {
+	background-color: var(--accent-color) !important;
+}
+
+html[data-accent] .text-blue-700 {
+	color: var(--accent-color) !important;
 }
 
 @theme inline {

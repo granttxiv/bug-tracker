@@ -2175,6 +2175,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.102.3":
+  version: 5.102.3
+  resolution: "@tanstack/query-core@npm:5.102.3"
+  checksum: 10c0/9d61088808decfc62f1aaacfa4fd29889d8a70bcfda7061790f0fd263388f65d85b1df80d3656ee5f8cd1339432034cd8a488d1efa995a2bfffa07acbce4d508
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.102.3":
+  version: 5.102.3
+  resolution: "@tanstack/react-query@npm:5.102.3"
+  dependencies:
+    "@tanstack/query-core": "npm:5.102.3"
+  peerDependencies:
+    react: ^18 || ^19
+  checksum: 10c0/d5f3b1572085a76955044435a0d7733a66c1a1a5363a8dbe4a14a1ccb42d29a679cc60cda35a603fe6464c981f44bc48c26a47891b9557ea3ca13b801cba1f66
+  languageName: node
+  linkType: hard
+
 "@ts-morph/common@npm:~0.27.0":
   version: 0.27.0
   resolution: "@ts-morph/common@npm:0.27.0"
@@ -3011,6 +3029,7 @@ __metadata:
     "@aws-sdk/s3-request-presigner": "npm:^3.545.0"
     "@base-ui/react": "npm:^1.7.0"
     "@tailwindcss/postcss": "npm:^4"
+    "@tanstack/react-query": "npm:^5.102.3"
     "@types/jsonwebtoken": "npm:^9.0.10"
     "@types/node": "npm:^20"
     "@types/pg": "npm:^8.23.1"

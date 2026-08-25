@@ -35,6 +35,15 @@ export default function Dashboard() {
 	const [error, setError] = useState(
 		token ? "" : "Please sign in to view your dashboard.",
 	);
+  const [name, setName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("bug_tracker_user");
+    if (storedUser) {
+      const user = JSON.parse(storedUser) as { name?: string };
+      setName(user.name?.split(" ")?.[0] ?? null);
+    }
+  }, []);
 
 	useEffect(() => {
 		if (!token) return;
@@ -126,7 +135,7 @@ export default function Dashboard() {
 							Product dashboard
 						</p>
 						<h1 className="mt-2 text-3xl font-bold tracking-tight">
-							Workspace overview
+							Welcome {name ? `back, ${name}` : "to Bug Tracker"}
 						</h1>
 						<p className="mt-2 text-sm text-slate-500">
 							Live ticket activity from your workspace.
@@ -166,9 +175,9 @@ export default function Dashboard() {
 									key={days[index].toISOString()}
 									className="flex flex-1 flex-col items-center gap-3"
 								>
-									<div className="flex h-40 w-full items-end justify-center rounded-t-2xl bg-slate-100 p-1">
+									<div className="flex h-40 w-full items-end justify-center rounded-t-2xl bg-slate-100">
 										<div
-											className="w-full rounded-t-xl bg-linear-to-t from-blue-700 to-cyan-400"
+											className="w-full rounded-t-xl bg-blue-800"
 											style={{
 												height: `${Math.max((value / maxActivity) * 100, value ? 8 : 0)}%`,
 											}}
@@ -188,7 +197,7 @@ export default function Dashboard() {
 						<h3 className="mt-2 text-xl font-semibold">Status overview</h3>
 						<div className="mt-6 space-y-5">
 							{[
-								["Open", counts.open, "bg-blue-600"],
+								["Open", counts.open, "bg-blue-800"],
 								["In progress", counts.inProgress, "bg-amber-500"],
 								["Resolved", counts.resolved, "bg-emerald-500"],
 							].map(([label, value, color]) => (
