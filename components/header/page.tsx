@@ -25,16 +25,19 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [search, setSearch] = useState("");
 	const [profileInitials, setProfileInitials] = useState("?");
+	const [user, setUser] = useState("");
 
 	useEffect(() => {
 		const readProfile = () => {
 			try {
-				const storedUser = localStorage.getItem("bug_tracker_user");
-				const user = storedUser
+				const storedUser = localStorage.getItem("bug_tracker_user") as string;
+				setUser(storedUser);
+				const parsedUser = storedUser
 					? (JSON.parse(storedUser) as { name?: string })
 					: null;
-				setProfileInitials(getInitials(user?.name));
+				setProfileInitials(getInitials(parsedUser?.name));
 			} catch {
+				setUser("");
 				setProfileInitials("?");
 			}
 		};
@@ -59,7 +62,7 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 					href="/"
 					className="flex shrink-0 items-center gap-2 text-slate-900"
 				>
-					<span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-700 text-sm font-black text-white">
+					<span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-800 text-sm font-black text-white">
 						B
 					</span>
 					<span className="hidden text-sm font-bold tracking-tight sm:inline">
@@ -86,36 +89,43 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 				</form>
 
 				<div className="hidden items-center gap-1 lg:flex">
-					{navigation.map((item) => {
-						const isActive =
-							pathname === item.href || pathname.startsWith(`${item.href}/`);
-						return (
-							<Link
-								key={item.href}
-								href={item.href}
-								className={`rounded-lg px-3 py-2 text-sm font-medium transition ${isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
-							>
-								{item.label}
-							</Link>
-						);
-					})}
+					{user
+						? navigation.map((item) => {
+								const isActive =
+									pathname === item.href ||
+									pathname.startsWith(`${item.href}/`);
+								return (
+									<Link
+										key={item.href}
+										href={item.href}
+										className={`rounded-lg px-3 py-2 text-sm font-medium transition ${isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
+									>
+										{item.label}
+									</Link>
+								);
+							})
+						: null}
 				</div>
 
 				<div className="ml-auto flex items-center gap-2">
-					<Link
-						href="/issues"
-						className="hidden items-center gap-1.5 rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600 sm:inline-flex"
-					>
-						<Plus size={16} />
-						Create
-					</Link>
-					<Link
-						href="/settings"
-						aria-label="Open settings"
-						className={`flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700 ring-2 ring-white transition hover:bg-slate-200 ${pathname === "/settings" ? "ring-blue-200" : ""}`}
-					>
-						{profileInitials}
-					</Link>
+					{user ? (
+						<>
+							<Link
+								href="/issues"
+								className="hidden items-center gap-1.5 rounded-lg bg-blue-800 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 sm:inline-flex"
+							>
+								<Plus size={16} />
+								Create
+							</Link>
+							<Link
+								href="/settings"
+								aria-label="Open settings"
+								className={`flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700 ring-2 ring-white transition hover:bg-slate-200 ${pathname === "/settings" ? "ring-blue-200" : ""}`}
+							>
+								{profileInitials}
+							</Link>
+						</>
+					) : null}
 					<button
 						type="button"
 						onClick={() => setIsOpen((value) => !value)}
@@ -145,16 +155,18 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 						/>
 					</form>
 					<div className="grid gap-1">
-						{navigation.map((item) => (
-							<Link
-								key={item.href}
-								href={item.href}
-								onClick={() => setIsOpen(false)}
-								className={`rounded-lg px-3 py-2 text-sm font-medium ${pathname === item.href ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"}`}
-							>
-								{item.label}
-							</Link>
-						))}
+						{user
+							? navigation.map((item) => (
+									<Link
+										key={item.href}
+										href={item.href}
+										onClick={() => setIsOpen(false)}
+										className={`rounded-lg px-3 py-2 text-sm font-medium ${pathname === item.href ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50"}`}
+									>
+										{item.label}
+									</Link>
+								))
+							: " "}
 					</div>
 				</div>
 			)}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Check, Circle, Pencil, X } from "lucide-react";
-import AddItemButton from "../../(components)/addItem/page";
+import AddItemButton from "../../../components/addItem/page";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
 type Ticket = {
