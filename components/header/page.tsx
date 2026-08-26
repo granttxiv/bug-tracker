@@ -66,7 +66,7 @@ const NavHeader = ({ className = "" }: { className?: string }) => {
 						B
 					</span>
 					<span className="hidden text-sm font-bold tracking-tight sm:inline">
-						Bug Tracker
+						TrackMe
 					</span>
 				</Link>
 

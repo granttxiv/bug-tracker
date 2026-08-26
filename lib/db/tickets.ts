@@ -73,6 +73,7 @@ export async function getTicketWithDetails(ticketId: string) {
 		? await db.select().from(users).where(eq(users.id, ticket.assignedTo))
 		: null;
 	const members = await getTicketMembers(ticketId);
+	console.log(assignedUser)
 
 	return {
 		...ticket,

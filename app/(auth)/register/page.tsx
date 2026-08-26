@@ -8,7 +8,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { apiClient } from "@/app/api/requestProcessor";
 
-
 type SignupFormValues = {
 	firstName: string;
 	lastName: string;
@@ -65,7 +64,7 @@ const Register = () => {
 						href="/"
 						className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700"
 					>
-						Bug Tracker
+						TrackMe
 					</Link>
 					<h1 className="mt-5 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
 						Set up your workspace

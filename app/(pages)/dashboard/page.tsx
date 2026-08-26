@@ -35,15 +35,15 @@ export default function Dashboard() {
 	const [error, setError] = useState(
 		token ? "" : "Please sign in to view your dashboard.",
 	);
-  const [name, setName] = useState<string | null>(null);
+	const [name, setName] = useState<string | null>(null);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("bug_tracker_user");
-    if (storedUser) {
-      const user = JSON.parse(storedUser) as { name?: string };
-      setName(user.name?.split(" ")?.[0] ?? null);
-    }
-  }, []);
+	useEffect(() => {
+		const storedUser = localStorage.getItem("bug_tracker_user");
+		if (storedUser) {
+			const user = JSON.parse(storedUser) as { name?: string };
+			setName(user.name?.split(" ")?.[0] ?? null);
+		}
+	}, []);
 
 	useEffect(() => {
 		if (!token) return;
@@ -135,7 +135,7 @@ export default function Dashboard() {
 							Product dashboard
 						</p>
 						<h1 className="mt-2 text-3xl font-bold tracking-tight">
-							Welcome {name ? `back, ${name}` : "to Bug Tracker"}
+							Welcome {name ? `back, ${name}` : "to TrackMe"}
 						</h1>
 						<p className="mt-2 text-sm text-slate-500">
 							Live ticket activity from your workspace.

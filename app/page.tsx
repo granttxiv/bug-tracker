@@ -49,7 +49,7 @@ export default function Home() {
 					<div className="grid gap-8 p-6 md:p-10 lg:grid-cols-[1.2fr_0.8fr] lg:p-12">
 						<div className="flex flex-col justify-center">
 							<p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700">
-								Bug Tracker
+								TrackMe
 							</p>
 							<h1 className="mt-4 text-4xl font-black tracking-tight text-slate-900 md:text-5xl">
 								Ship better work with a clearer view of every issue.

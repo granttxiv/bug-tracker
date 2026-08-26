@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Bug Tracker",
+	title: "TrackMe",
 	description: "A lightweight issue and bug tracking dashboard",
 };
 

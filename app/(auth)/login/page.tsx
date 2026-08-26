@@ -54,7 +54,7 @@ const Login = () => {
 						href="/"
 						className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-800"
 					>
-						Bug Tracker
+						TrackMe
 					</Link>
 					<h1 className="mt-5 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
 						Welcome back
